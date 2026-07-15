@@ -58,7 +58,7 @@ const LINKS = Object.freeze([
 ]);
 
 const PHOTO_GROUPS = Object.freeze([
-  Object.freeze({ id: "principal", title: "Dormitorio principal", slug: "01-dormitorio-principal", captions: ["Vista general", "Cama principal", "Detalles del dormitorio"] }),
+  Object.freeze({ id: "principal", title: "Dormitorio principal", slug: "01-dormitorio-principal", files: [1, 3], captions: ["Vista general", "Detalles del dormitorio"] }),
   Object.freeze({ id: "futon", title: "Dormitorio con futón", slug: "02-dormitorio-futon", captions: ["Futón como sofá", "Vista del dormitorio", "Iluminación natural", "Espacio de guardado", "Detalles del ambiente", "Acceso al dormitorio", "Zona de descanso", "Rincón del dormitorio", "Vista general", "Futón preparado como cama"] }),
   Object.freeze({ id: "literas", title: "Dormitorio con literas", slug: "03-dormitorio-literas", captions: ["Vista del dormitorio", "Literas", "Escalera y protecciones", "Iluminación natural", "Espacio para descansar", "Detalles del ambiente", "Vista lateral", "Acceso al dormitorio", "Rincón de las literas", "Vista general"] }),
   Object.freeze({ id: "banos", title: "Baños", slug: "04-banos", captions: ["Baño principal", "Lavamanos y espejo", "Ducha", "Vista general", "Segundo baño"] }),
@@ -75,7 +75,7 @@ const GALLERY_PHOTOS = Object.freeze(PHOTO_GROUPS.flatMap((group) =>
   group.captions.map((caption, index) => Object.freeze({
     category: group.title,
     groupId: group.id,
-    src: `assets/photos/${group.slug}-${String(index + 1).padStart(2, "0")}.webp`,
+    src: `assets/photos/${group.slug}-${String(group.files?.[index] ?? index + 1).padStart(2, "0")}.webp`,
     alt: `${group.title} de Cordal Sur: ${caption.toLocaleLowerCase("es-CL")}`,
     caption
   }))
