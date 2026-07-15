@@ -141,11 +141,27 @@ a { color: inherit; }
 }
 .brand-logo {
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 144%;
-  max-width: none;
-  transform: translate(-8%, -50%);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 13px;
+}
+.brand-symbol {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  background: var(--forest);
+  -webkit-mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
+  mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
+}
+.brand-name {
+  color: var(--forest);
+  font-size: 1.32rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -.045em;
+  white-space: nowrap;
 }
 .location-badge {
   position: absolute;
