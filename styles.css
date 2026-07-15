@@ -95,7 +95,7 @@ a { color: inherit; }
   background: var(--ivory);
   box-shadow: var(--shadow-page);
 }
-.site-header { padding-top: 16px; }
+.site-header { padding-top: 10px; }
 .hero {
   overflow: hidden;
   background: var(--ivory);
@@ -132,12 +132,12 @@ a { color: inherit; }
 }
 .brand-plate {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  width: min(calc(100% - 36px), 300px);
-  height: 104px;
+  top: 12px;
+  left: 14px;
+  width: min(calc(100% - 28px), 216px);
+  height: 72px;
   overflow: hidden;
-  border-radius: var(--radius-control);
+  border-radius: 18px;
 }
 .brand-logo {
   position: absolute;
@@ -149,16 +149,16 @@ a { color: inherit; }
 }
 .location-badge {
   position: absolute;
-  top: 130px;
-  left: 18px;
-  min-height: 34px;
+  top: 92px;
+  left: 14px;
+  min-height: 30px;
   display: inline-flex;
   align-items: center;
   margin: 0;
-  padding: 7px 11px;
+  padding: 6px 10px;
   color: var(--ivory);
   border-radius: 999px;
-  font-size: .69rem;
+  font-size: .62rem;
   font-weight: 800;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -423,7 +423,7 @@ a { color: inherit; }
 :focus-visible { outline: 3px solid var(--forest); outline-offset: 3px; box-shadow: 0 0 0 6px var(--gold); }
 @media (min-width: 480px) {
   .page-shell { padding-inline: 22px; }
-  .site-header { padding-top: 22px; }
+  .site-header { padding-top: 14px; }
   .hero-media { height: 570px; }
   .hero-meta { bottom: 91px; }
   .carousel-controls { bottom: 22px; }
