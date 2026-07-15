@@ -42,7 +42,7 @@ const LINKS = Object.freeze([
   Object.freeze({
     id: "mountain",
     group: "travel",
-    label: "Reporte de montaña",
+    label: "Reporte oficial de montaña",
     detail: "Información oficial de Nevados",
     icon: "mountain",
     url: "https://www.nevadosdechillan.com/reporte-montana"
@@ -175,6 +175,7 @@ function initializeLinks() {
   const whatsappAnchor = document.querySelector("#whatsapp-link");
   if (whatsappAnchor) {
     whatsappAnchor.href = safeHref(whatsapp.url) || "#";
+    whatsappAnchor.setAttribute("aria-label", whatsapp.label);
     whatsappAnchor.removeAttribute("target");
     whatsappAnchor.removeAttribute("rel");
   }
@@ -450,6 +451,7 @@ function initializeShare() {
   const button = document.querySelector("#share");
   if (!button) return;
   const originalMarkup = button.innerHTML;
+  const shareUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href.split(/[?#]/)[0], shareTitle = document.title, shareText = document.querySelector('meta[name="description"]')?.content || "Conoce Cordal Sur.";
   let restoreTimer = 0;
   const showStatus = (message) => {
     window.clearTimeout(restoreTimer);
@@ -459,8 +461,7 @@ function initializeShare() {
   };
   const copy = async (text) => {
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
+      try { await navigator.clipboard.writeText(text); return true; } catch { /* Use the in-page fallback below. */ }
     }
     const input = document.createElement("textarea");
     input.value = text;
@@ -474,10 +475,9 @@ function initializeShare() {
     return copied;
   };
   button.addEventListener("click", async () => {
-    const url = window.location.href.split("#")[0];
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Cordal Sur · Las Trancas", text: "Conoce Cordal Sur, tu refugio cerca de la montaña.", url });
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
         showStatus("¡Gracias por compartir!");
         return;
       } catch (error) {
@@ -485,7 +485,7 @@ function initializeShare() {
       }
     }
     try {
-      showStatus(await copy(url) ? "Enlace copiado" : "No fue posible copiar el enlace");
+      showStatus(await copy(shareUrl) ? "Enlace copiado" : "No fue posible copiar el enlace");
     } catch {
       showStatus("No fue posible copiar el enlace");
     }
