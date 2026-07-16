@@ -8,6 +8,20 @@ const LINKS = Object.freeze([
     url: "https://wa.me/56990137732?text=Hola%20Cordal%20Sur%2C%20quiero%20consultar%20disponibilidad.%20Mis%20fechas%20son%20del%20___%20al%20___%20y%20somos%20___%20hu%C3%A9spedes."
   }),
   Object.freeze({
+    id: "mercadopago",
+    group: "payment",
+    label: "Abona a Cordal Sur",
+    detail: "Ingresa el monto acordado y paga de forma segura mediante Mercado Pago",
+    icon: "card",
+    url: "https://link.mercadopago.cl/carhartt"
+  }),
+  Object.freeze({
+    id: "payment-receipt",
+    group: "payment-receipt",
+    label: "Enviar comprobante por WhatsApp",
+    url: "https://wa.me/56990137732?text=Hola%20Cordal%20Sur%2C%20adjunto%20el%20comprobante%20de%20mi%20abono%20por%20Mercado%20Pago.%20Reserva%20a%20nombre%20de%3A%20___"
+  }),
+  Object.freeze({
     id: "airbnb",
     group: "platform",
     label: "Airbnb",
@@ -107,6 +121,7 @@ Object.assign(window, { LINKS, HERO_PHOTOS, GALLERY_PHOTOS });
 const ICONS = Object.freeze({
   house: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 23.5 24 9l17 14.5"/><path d="M11 21v19h26V21M20 40V28h8v12"/></svg>',
   calendar: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="10" width="34" height="31" rx="5"/><path d="M15 6v8M33 6v8M7 19h34M16 30l5 5 11-11"/></svg>',
+  card: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="10" width="38" height="28" rx="6"/><path d="M5 19h38M12 30h9M35 29.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 1 1 0-7Z"/></svg>',
   camera: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="7" width="34" height="34" rx="10"/><circle cx="24" cy="24" r="8"/><circle cx="34.5" cy="13.5" r="1.5" class="icon-fill"/></svg>',
   snow: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 5v38M7.5 14.5l33 19M7.5 33.5l33-19M18 9l6 6 6-6M18 39l6-6 6 6M8 22l8 2-2 8M40 26l-8-2 2-8"/></svg>',
   mountain: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="m4 39 13-23 6 10 6-17 15 30H4Z"/><path d="m13 23 4 4 4-4M25 19l4 5 4-5"/></svg>',
@@ -115,7 +130,8 @@ const ICONS = Object.freeze({
 
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
-  "www.snow-forecast.com", "www.nevadosdechillan.com", "www.google.com"
+  "www.snow-forecast.com", "www.nevadosdechillan.com", "www.google.com",
+  "link.mercadopago.cl"
 ]);
 
 function safeHref(value) {
@@ -181,6 +197,63 @@ function initializeLinks() {
   }
   renderLinks(document.querySelector("#platform-links"), LINKS.filter(({ group }) => group === "platform"), "platform");
   renderLinks(document.querySelector("#travel-links"), LINKS.filter(({ group }) => group === "travel"), "travel");
+}
+
+function initializePayment() {
+  const payment = LINKS.find(({ id }) => id === "mercadopago");
+  const receipt = LINKS.find(({ id }) => id === "payment-receipt");
+  const dialog = document.querySelector("#payment-dialog");
+  const openButton = document.querySelector("#open-payment");
+  const closeButton = document.querySelector("#payment-close");
+  const cancelButton = document.querySelector("#payment-cancel");
+  const continueLink = document.querySelector("#payment-continue");
+  const receiptLink = document.querySelector("#payment-receipt");
+  const icon = document.querySelector("#payment-icon");
+  if (!payment || !receipt || !dialog || !openButton || !closeButton || !cancelButton || !continueLink || !receiptLink || !icon) return;
+
+  const paymentHref = safeHref(payment.url);
+  const receiptHref = safeHref(receipt.url);
+  if (!paymentHref || !receiptHref) {
+    openButton.disabled = true;
+    openButton.setAttribute("aria-disabled", "true");
+    return;
+  }
+
+  icon.innerHTML = ICONS[payment.icon];
+  continueLink.href = paymentHref;
+  continueLink.setAttribute("aria-label", "Continuar a Mercado Pago; se abrirá en una pestaña nueva");
+  receiptLink.href = receiptHref;
+  receiptLink.setAttribute("aria-label", "Enviar comprobante por WhatsApp; se abrirá en una pestaña nueva");
+
+  let returnFocus = openButton;
+  const close = () => {
+    if (dialog.open && typeof dialog.close === "function") {
+      dialog.close();
+      return;
+    }
+    dialog.removeAttribute("open");
+    returnFocus?.focus();
+  };
+
+  openButton.addEventListener("click", () => {
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : openButton;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+    continueLink.focus();
+  });
+  closeButton.addEventListener("click", close);
+  cancelButton.addEventListener("click", close);
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener("close", () => returnFocus?.focus());
 }
 
 function initializeCarousel() {
@@ -493,6 +566,7 @@ function initializeShare() {
 }
 
 initializeLinks();
+initializePayment();
 initializeCarousel();
 initializeGallery();
 initializeShare();

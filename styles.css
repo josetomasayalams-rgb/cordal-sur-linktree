@@ -320,6 +320,37 @@ a { color: inherit; }
 .whatsapp-copy strong { font-size: clamp(1rem, 4.4vw, 1.25rem); font-weight: 800; line-height: 1.15; }
 .whatsapp-copy small { margin-top: 7px; color: var(--glacial); font-size: .7rem; line-height: 1.35; }
 .whatsapp-arrow { color: var(--gold); font-size: 1.55rem; }
+.payment-section { padding: 0 0 12px; }
+.payment-card {
+  width: 100%;
+  min-height: 132px;
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 18px;
+  color: var(--ivory);
+  border-radius: var(--radius-tray);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.payment-card:disabled { cursor: not-allowed; opacity: .62; }
+.payment-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  color: var(--ivory);
+  border-radius: 20px;
+}
+.payment-icon svg { width: 35px; height: 35px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.payment-copy { min-width: 0; }
+.payment-copy span, .payment-copy strong, .payment-copy small { display: block; }
+.payment-kicker { margin-bottom: 4px; color: var(--glacial); font-size: .7rem; font-weight: 600; letter-spacing: .03em; }
+.payment-copy strong { font-size: clamp(1rem, 4.4vw, 1.25rem); font-weight: 800; line-height: 1.15; }
+.payment-copy small { margin-top: 7px; color: var(--glacial); font-size: .7rem; line-height: 1.35; }
+.payment-arrow { color: var(--gold); font-size: 1.55rem; }
 .content-section { padding: 32px 2px 0; }
 .section-heading { margin-bottom: 15px; }
 .section-heading h2 { margin: 0; font-size: clamp(1.55rem, 7vw, 2rem); font-weight: 800; line-height: 1.1; letter-spacing: -.04em; }
@@ -435,6 +466,60 @@ a { color: inherit; }
 .photo-viewer-nav { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); }
 .photo-viewer-prev { left: 10px; }
 .photo-viewer-next { right: 10px; }
+.payment-dialog {
+  width: min(100% - 24px, 520px);
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  color: var(--forest);
+  background: var(--ivory);
+  border: 1px solid var(--glacial);
+  border-radius: 28px;
+  box-shadow: var(--shadow-page);
+}
+.payment-dialog-inner { padding: 22px 18px 20px; }
+.payment-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.payment-dialog-header h2 { margin: 0; font-size: clamp(1.55rem, 7vw, 2rem); line-height: 1.1; letter-spacing: -.04em; }
+.payment-dialog-close {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  padding: 0;
+  color: var(--forest);
+  background: var(--glacial);
+  border: 1px solid var(--forest-12);
+  border-radius: 50%;
+  font: inherit;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.payment-dialog-body { padding: 22px 2px 8px; }
+.payment-dialog-body > p:first-child { margin: 0; color: var(--sage); }
+.payment-steps { display: grid; gap: 12px; margin: 22px 0; padding-left: 24px; }
+.payment-steps li { padding-left: 4px; color: var(--forest); font-size: .9rem; }
+.payment-steps li::marker { color: var(--gold); font-weight: 800; }
+.payment-destination { margin: 0; padding: 12px 14px; color: var(--sage); background: var(--glacial); border-radius: 16px; font-size: .75rem; }
+.payment-destination span { color: var(--forest); font-weight: 800; }
+.payment-dialog-actions { display: grid; gap: 10px; padding-top: 14px; }
+.payment-dialog-action {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 18px;
+  font-size: .86rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+}
+.payment-dialog-primary { color: var(--ivory); }
+.payment-dialog-secondary { color: var(--forest); }
+.payment-dialog-cancel { min-height: 48px; padding: 10px; color: var(--sage); background: transparent; border: 0; border-radius: 16px; font: inherit; font-size: .8rem; font-weight: 800; cursor: pointer; }
 .noscript-note { position: fixed; z-index: 101; right: 12px; bottom: 12px; left: 12px; max-width: 560px; margin: auto; padding: 14px; color: var(--ivory); background: var(--forest); border: 1px solid var(--gold); border-radius: 14px; text-align: center; }
 :focus-visible { outline: 3px solid var(--forest); outline-offset: 3px; box-shadow: 0 0 0 6px var(--gold); }
 @media (min-width: 480px) {
@@ -446,6 +531,7 @@ a { color: inherit; }
   .gallery-label-long { display: inline; }
   .gallery-label-short { display: none; }
   .whatsapp-card { padding-inline: 24px; }
+  .payment-card { padding-inline: 24px; }
   .gallery-dialog-inner { padding-inline: 24px; }
   .gallery-header { margin-inline: -24px; padding-inline: 24px; }
   .gallery-group-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }

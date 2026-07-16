@@ -105,6 +105,18 @@
       </a>
     </section>
 
+    <section class="payment-section" aria-labelledby="payment-title">
+      <button class="payment-card glass-surface glass-tinted glass-interactive" id="open-payment" type="button" aria-haspopup="dialog" aria-controls="payment-dialog">
+        <span class="payment-icon" id="payment-icon" aria-hidden="true"></span>
+        <span class="payment-copy">
+          <span class="payment-kicker">Pago seguro · Mercado Pago</span>
+          <strong id="payment-title">Abona a Cordal Sur</strong>
+          <small>Ingresa el monto acordado y paga de forma segura mediante Mercado Pago</small>
+        </span>
+        <span class="payment-arrow" aria-hidden="true">→</span>
+      </button>
+    </section>
+
     <section class="content-section" aria-labelledby="platform-title">
       <div class="section-heading">
         <p class="eyebrow">Encuentra Cordal Sur</p>
@@ -153,6 +165,38 @@
       <button class="icon-button photo-viewer-nav photo-viewer-prev glass-interactive" id="photo-viewer-prev" type="button" aria-label="Foto anterior">←</button>
       <figure><img id="photo-viewer-image" alt=""><figcaption id="photo-viewer-caption"></figcaption></figure>
       <button class="icon-button photo-viewer-nav photo-viewer-next glass-interactive" id="photo-viewer-next" type="button" aria-label="Foto siguiente">→</button>
+    </div>
+  </dialog>
+
+  <dialog class="payment-dialog" id="payment-dialog" aria-labelledby="payment-dialog-title" aria-describedby="payment-dialog-description">
+    <div class="payment-dialog-inner">
+      <header class="payment-dialog-header">
+        <div>
+          <p class="eyebrow">Pago seguro</p>
+          <h2 id="payment-dialog-title">Antes de pagar</h2>
+        </div>
+        <button class="payment-dialog-close glass-interactive" id="payment-close" type="button" aria-label="Cerrar instrucciones de pago">×</button>
+      </header>
+
+      <div class="payment-dialog-body">
+        <p id="payment-dialog-description">Serás dirigido al canal de pago de Cordal Sur en Mercado Pago.</p>
+        <ol class="payment-steps">
+          <li>Ingresa únicamente el monto acordado para tu reserva.</li>
+          <li>Revisa el monto antes de elegir el medio de pago.</li>
+          <li>Cuando finalices, envía el comprobante por WhatsApp.</li>
+        </ol>
+        <p class="payment-destination"><span aria-hidden="true">✓</span> Destino seguro: <strong>link.mercadopago.cl</strong></p>
+      </div>
+
+      <div class="payment-dialog-actions">
+        <a class="payment-dialog-action payment-dialog-primary glass-surface glass-tinted glass-interactive" id="payment-continue" target="_blank" rel="noopener noreferrer">
+          Continuar a Mercado Pago <span aria-hidden="true">↗</span>
+        </a>
+        <a class="payment-dialog-action payment-dialog-secondary glass-surface glass-regular glass-interactive" id="payment-receipt" target="_blank" rel="noopener noreferrer">
+          Enviar comprobante por WhatsApp
+        </a>
+        <button class="payment-dialog-cancel" id="payment-cancel" type="button">Cancelar</button>
+      </div>
     </div>
   </dialog>
 
