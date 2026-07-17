@@ -48,20 +48,20 @@ test("keeps ES, PT-BR and EN translation keys in parity", () => {
   }
 });
 
-test("uses Linktree-only storage and Spanish/light fallbacks", () => {
+test("uses Linktree-only storage with Spanish and dark fallbacks", () => {
   const { api, document, values } = loadPreferences({ "gh-lang": "en", "gh-theme-v3": "dark" });
   assert.equal(api.LANGUAGE_STORAGE_KEY, "cs-linktree-lang-v1");
   assert.equal(api.THEME_STORAGE_KEY, "cs-linktree-theme-v1");
   assert.equal(api.getLanguage(), "es");
-  assert.equal(api.getTheme(), "light");
+  assert.equal(api.getTheme(), "dark");
   api.setLanguage("invalid");
   api.setTheme("invalid");
   assert.equal(values.get("cs-linktree-lang-v1"), "es");
-  assert.equal(values.get("cs-linktree-theme-v1"), "light");
+  assert.equal(values.get("cs-linktree-theme-v1"), "dark");
   assert.equal(values.get("gh-lang"), "en");
   assert.equal(values.get("gh-theme-v3"), "dark");
   assert.equal(document.documentElement.lang, "es-CL");
-  assert.equal(document.documentElement.dataset.theme, "light");
+  assert.equal(document.documentElement.dataset.theme, "dark");
 });
 
 test("maps languages to the correct HTML locale and persists theme", () => {
@@ -76,6 +76,16 @@ test("maps languages to the correct HTML locale and persists theme", () => {
   assert.equal(document.documentElement.dataset.theme, "dark");
 });
 
+test("keeps an explicitly saved light theme while defaulting new visits to dark", () => {
+  const fresh = loadPreferences();
+  assert.equal(fresh.api.getTheme(), "dark");
+  assert.equal(fresh.document.documentElement.dataset.theme, "dark");
+
+  const savedLight = loadPreferences({ "cs-linktree-theme-v1": "light" });
+  assert.equal(savedLight.api.getTheme(), "light");
+  assert.equal(savedLight.document.documentElement.dataset.theme, "light");
+});
+
 test("connects every static and programmatic translation key", () => {
   const { api } = loadPreferences();
   const keys = new Set(Object.keys(api.translations.es));
@@ -88,8 +98,8 @@ test("connects every static and programmatic translation key", () => {
   assert.match(html, /data-language-option="es" aria-pressed="true"/);
   assert.match(html, /data-language-option="pt" aria-pressed="false"/);
   assert.match(html, /data-language-option="en" aria-pressed="false"/);
-  assert.match(html, /data-theme-option="light"[^>]+aria-pressed="true"/);
-  assert.match(html, /data-theme-option="dark"[^>]+aria-pressed="false"/);
+  assert.match(html, /data-theme-option="light"[^>]+aria-pressed="false"/);
+  assert.match(html, /data-theme-option="dark"[^>]+aria-pressed="true"/);
 });
 
 test("applies the saved Linktree theme before styles load", () => {
@@ -99,6 +109,9 @@ test("applies the saved Linktree theme before styles load", () => {
   const appScript = html.indexOf('<script src="app.js" defer>');
   assert.ok(bootstrap > 0 && bootstrap < firstStylesheet);
   assert.ok(preferencesScript > firstStylesheet && preferencesScript < appScript);
+  assert.match(html, /data-theme="dark"/);
+  assert.match(html, /getItem\("cs-linktree-theme-v1"\) === "light" \? "light" : "dark"/);
+  assert.match(html, /catch \{\s*document\.documentElement\.dataset\.theme = "dark";/);
 });
 
 test("keeps the Linktree compatible with direct file opening", () => {

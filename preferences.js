@@ -6,7 +6,7 @@
   const SUPPORTED_LANGUAGES = Object.freeze(["es", "pt", "en"]);
   const SUPPORTED_THEMES = Object.freeze(["light", "dark"]);
   const FALLBACK_LANGUAGE = "es";
-  const FALLBACK_THEME = "light";
+  const FALLBACK_THEME = "dark";
   const HTML_LANGUAGES = Object.freeze({ es: "es-CL", pt: "pt-BR", en: "en" });
   const THEME_COLORS = Object.freeze({ light: "#153B33", dark: "#071914" });
 
