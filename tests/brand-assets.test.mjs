@@ -61,7 +61,7 @@ test("removes generic destination pictograms and renders decorative brand marks"
 });
 
 test("documents Cordal treatments while preserving official brand geometry", () => {
-  assert.equal(manifest.brands.mercadopago.treatment, "Cordal Sur deep-blue background; official geometry retained");
+  assert.equal(manifest.brands.mercadopago.treatment, "Cordal Sur light-green background and dark-green border; official geometry retained");
   assert.equal(manifest.brands.googleMaps.treatment, "Native brand colors");
   for (const brandKey of ["whatsapp", "airbnb", "booking", "instagram", "snowForecast", "nevados"]) {
     assert.equal(manifest.brands[brandKey].treatment, "Cordal Sur monochrome mask");
@@ -73,12 +73,14 @@ test("documents Cordal treatments while preserving official brand geometry", () 
   assert.match(glass, /brand-stage--native/);
 });
 
-test("recolors only the Mercado Pago background to Cordal Sur deep blue", () => {
+test("recolors the Mercado Pago background and border with Cordal Sur greens", () => {
   const mercadoPago = fs.readFileSync(new URL("assets/brands/mercado-pago-handshake.svg", root), "utf8");
-  assert.match(mercadoPago, /fill="#12344d"/);
+  assert.match(mercadoPago, /fill="#70b394"/);
+  assert.match(mercadoPago, /fill="#153b33"/);
   assert.doesNotMatch(mercadoPago, /#00bcff/i);
+  assert.doesNotMatch(mercadoPago, /#0a0080/i);
+  assert.doesNotMatch(mercadoPago, /#12344d/i);
   assert.match(mercadoPago, /class="st1"/);
-  assert.match(mercadoPago, /fill="#0a0080"/);
 });
 
 test("preserves every existing external destination", () => {
