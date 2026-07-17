@@ -35,18 +35,21 @@ test("maps every external destination to a local official brand asset", () => {
 
 test("keeps brand files local, intact and free of executable SVG content", () => {
   for (const entry of Object.values(manifest.brands)) {
-    const assetUrl = new URL(`assets/brands/${entry.file}`, root);
-    assert.ok(fs.existsSync(assetUrl), `Missing ${entry.file}`);
-    const contents = fs.readFileSync(assetUrl);
-    const digest = crypto.createHash("sha256").update(contents).digest("hex");
-    assert.equal(digest, entry.sha256, `Checksum mismatch for ${entry.file}`);
+    const variants = [[entry.file, entry.sha256]];
+    if (entry.lightFile) variants.push([entry.lightFile, entry.lightSha256]);
+    for (const [file, sha256] of variants) {
+      const assetUrl = new URL(`assets/brands/${file}`, root);
+      assert.ok(fs.existsSync(assetUrl), `Missing ${file}`);
+      const contents = fs.readFileSync(assetUrl);
+      const digest = crypto.createHash("sha256").update(contents).digest("hex");
+      assert.equal(digest, sha256, `Checksum mismatch for ${file}`);
 
-    if (entry.file.endsWith(".svg")) {
+      if (!file.endsWith(".svg")) continue;
       const svg = contents.toString("utf8");
-      assert.match(svg, /<svg\b/i, `${entry.file} is not SVG`);
-      assert.match(svg, /viewBox=/i, `${entry.file} has no viewBox`);
-      assert.doesNotMatch(svg, /<script\b|javascript:|on(?:load|error)\s*=|<foreignObject\b/i, `${entry.file} contains executable content`);
-      assert.doesNotMatch(svg, /(?:href|xlink:href)=["']https?:/i, `${entry.file} hotlinks an external resource`);
+      assert.match(svg, /<svg\b/i, `${file} is not SVG`);
+      assert.match(svg, /viewBox=/i, `${file} has no viewBox`);
+      assert.doesNotMatch(svg, /<script\b|javascript:|on(?:load|error)\s*=|<foreignObject\b/i, `${file} contains executable content`);
+      assert.doesNotMatch(svg, /(?:href|xlink:href)=["']https?:/i, `${file} hotlinks an external resource`);
     }
   }
 });
@@ -78,7 +81,7 @@ test("switches Cordal brand surfaces between light and dark treatments", () => {
 });
 
 test("documents Cordal treatments while preserving official brand geometry", () => {
-  assert.equal(manifest.brands.mercadopago.treatment, "Cordal Sur light-green background and dark-green border; official geometry retained");
+  assert.equal(manifest.brands.mercadopago.treatment, "Light: white background and dark-green linework; dark: light-green background and dark-green border; official geometry retained");
   assert.equal(manifest.brands.googleMaps.treatment, "Native brand colors");
   for (const brandKey of ["whatsapp", "airbnb", "booking", "instagram", "snowForecast", "nevados"]) {
     assert.equal(manifest.brands[brandKey].treatment, "Cordal Sur monochrome mask");
@@ -92,12 +95,25 @@ test("documents Cordal treatments while preserving official brand geometry", () 
 
 test("recolors the Mercado Pago background and border with Cordal Sur greens", () => {
   const mercadoPago = fs.readFileSync(new URL("assets/brands/mercado-pago-handshake.svg", root), "utf8");
+  const mercadoPagoLight = fs.readFileSync(new URL("assets/brands/mercado-pago-handshake-light.svg", root), "utf8");
   assert.match(mercadoPago, /fill="#70b394"/);
   assert.match(mercadoPago, /fill="#153b33"/);
+  assert.match(mercadoPagoLight, /fill="#ffffff"/);
+  assert.match(mercadoPagoLight, /fill="#153b33"/);
+  assert.doesNotMatch(mercadoPagoLight, /#70b394/i);
   assert.doesNotMatch(mercadoPago, /#00bcff/i);
   assert.doesNotMatch(mercadoPago, /#0a0080/i);
   assert.doesNotMatch(mercadoPago, /#12344d/i);
   assert.match(mercadoPago, /class="st1"/);
+});
+
+test("switches the Mercado Pago asset with the page theme", () => {
+  assert.match(app, /lightSrc: "assets\/brands\/mercado-pago-handshake-light\.svg"/);
+  assert.match(app, /darkSrc: "assets\/brands\/mercado-pago-handshake\.svg"/);
+  assert.match(app, /brand-stage--themed/);
+  assert.match(styles, /\.brand-stage--themed \.brand-mark--dark \{ display: none; \}/);
+  assert.match(styles, /html\[data-theme="dark"\] \.brand-stage--themed \.brand-mark--light \{ display: none; \}/);
+  assert.match(styles, /html\[data-theme="dark"\] \.brand-stage--themed \.brand-mark--dark \{ display: block; \}/);
 });
 
 test("preserves every existing external destination", () => {

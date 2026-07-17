@@ -13,6 +13,8 @@ const BRAND_ASSETS = Object.freeze({
   }),
   mercadopago: Object.freeze({
     src: "assets/brands/mercado-pago-handshake.svg",
+    lightSrc: "assets/brands/mercado-pago-handshake-light.svg",
+    darkSrc: "assets/brands/mercado-pago-handshake.svg",
     type: "glyph",
     treatment: "adapted"
   }),
@@ -207,6 +209,22 @@ function populateBrandStage(stage, brandKey) {
   );
   stage.dataset.brand = brandKey;
   stage.setAttribute("aria-hidden", "true");
+
+  if (asset.lightSrc && asset.darkSrc) {
+    stage.classList.add("brand-stage--themed");
+    const lightImage = document.createElement("img");
+    lightImage.className = "brand-mark brand-mark--light";
+    lightImage.src = asset.lightSrc;
+    lightImage.alt = "";
+    lightImage.decoding = "async";
+    const darkImage = document.createElement("img");
+    darkImage.className = "brand-mark brand-mark--dark";
+    darkImage.src = asset.darkSrc;
+    darkImage.alt = "";
+    darkImage.decoding = "async";
+    stage.replaceChildren(lightImage, darkImage);
+    return true;
+  }
 
   if (asset.treatment !== "mask") {
     const image = document.createElement("img");
