@@ -140,10 +140,25 @@
     0 22px 46px rgba(21, 59, 51, .26);
 }
 
+.payment-card.glass-surface {
+  --glass-rim-c: rgba(217, 162, 79, .82);
+  box-shadow:
+    inset 0 1px 0 rgba(245, 247, 242, .46),
+    inset 0 -1px 0 rgba(217, 162, 79, .24),
+    0 4px 9px rgba(21, 59, 51, .14),
+    0 22px 46px rgba(21, 59, 51, .24);
+}
+
 .whatsapp-icon {
-  background: rgba(245, 247, 242, .14);
-  border: 1px solid rgba(245, 247, 242, .42);
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .28), 0 8px 18px rgba(21, 59, 51, .16);
+  background: linear-gradient(145deg, rgba(245, 247, 242, .24), rgba(245, 247, 242, .11));
+  border: 1px solid rgba(245, 247, 242, .58);
+  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .34), 0 9px 20px rgba(21, 59, 51, .18), 0 0 0 1px rgba(217, 162, 79, .12);
+}
+
+.payment-icon {
+  background: linear-gradient(145deg, rgba(245, 247, 242, .28), rgba(245, 247, 242, .12));
+  border: 1px solid rgba(217, 162, 79, .58);
+  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .36), 0 9px 22px rgba(21, 59, 51, .20), 0 0 0 1px rgba(245, 247, 242, .08);
 }
 
 .glass-tray { box-shadow: inset 0 1px 0 rgba(245, 247, 242, .68), 0 16px 34px rgba(21, 59, 51, .12); }
@@ -174,9 +189,10 @@
 
 .platform-icon,
 .travel-icon {
-  background: rgba(245, 247, 242, .25);
-  border: 1px solid rgba(245, 247, 242, .58);
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .78), 0 6px 14px rgba(21, 59, 51, .09);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .84), rgba(220, 230, 225, .46));
+  border: 1px solid rgba(21, 59, 51, .18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .88), 0 8px 18px rgba(21, 59, 51, .13), 0 0 0 1px rgba(217, 162, 79, .08);
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms var(--glass-ease), box-shadow 180ms ease;
 }
 
 .share-button.glass-surface {
@@ -185,15 +201,63 @@
 }
 
 .gallery-dialog::backdrop { background: rgba(21, 59, 51, .92); }
+.payment-dialog::backdrop { background: rgba(21, 59, 51, .82); backdrop-filter: blur(5px); }
 
 .gallery-close,
-.photo-viewer-nav {
+.photo-viewer-nav,
+.payment-dialog-close {
   background: rgba(245, 247, 242, .88);
   border: 1px solid rgba(245, 247, 242, .68);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82), 0 8px 20px rgba(21, 59, 51, .20);
 }
 
 .photo-viewer-nav { color: var(--forest); }
+
+html[data-theme="dark"] .glass-surface {
+  --glass-fill: rgba(15, 42, 36, .92);
+  --glass-rim-a: rgba(245, 247, 242, .20);
+  --glass-rim-b: rgba(245, 247, 242, .06);
+  --glass-rim-c: rgba(217, 162, 79, .42);
+  box-shadow:
+    inset 0 1px 0 rgba(245, 247, 242, .13),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 4px 10px rgba(0, 0, 0, .22),
+    0 20px 48px rgba(0, 0, 0, .32);
+}
+html[data-theme="dark"] .glass-surface::before {
+  background:
+    radial-gradient(circle 150px at var(--glass-x) var(--glass-y), rgba(245, 247, 242, .12), transparent 62%),
+    linear-gradient(145deg, rgba(245, 247, 242, .08), transparent 36%, rgba(217, 162, 79, .06));
+}
+html[data-theme="dark"] .glass-regular { --glass-fill: rgba(15, 42, 36, .88); color: #f5f7f2; }
+html[data-theme="dark"] .glass-clear { --glass-fill: rgba(7, 25, 20, .82); color: #f5f7f2; }
+html[data-theme="dark"] .glass-tinted { --glass-fill: rgba(18, 56, 47, .92); color: #f5f7f2; }
+html[data-theme="dark"] .brand-plate.glass-surface {
+  --glass-fill: rgba(245, 247, 242, .84);
+  --glass-rim-a: rgba(255,255,255,.78);
+  --glass-rim-b: rgba(245,247,242,.24);
+  --glass-rim-c: rgba(217,162,79,.52);
+}
+html[data-theme="dark"] .platform-card::before,
+html[data-theme="dark"] .travel-card::before {
+  background: radial-gradient(circle 120px at var(--glass-x) var(--glass-y), rgba(245,247,242,.14), rgba(245,247,242,.04) 68%, transparent);
+}
+html[data-theme="dark"] .platform-icon,
+html[data-theme="dark"] .travel-icon,
+html[data-theme="dark"] .whatsapp-icon,
+html[data-theme="dark"] .payment-icon {
+  background: linear-gradient(145deg, rgba(245,247,242,.14), rgba(245,247,242,.06));
+  border-color: rgba(245,247,242,.28);
+  box-shadow: inset 0 1px 0 rgba(245,247,242,.16), 0 9px 22px rgba(0,0,0,.27), 0 0 0 1px rgba(217,162,79,.08);
+}
+html[data-theme="dark"] .gallery-close,
+html[data-theme="dark"] .photo-viewer-nav,
+html[data-theme="dark"] .payment-dialog-close {
+  color: #f5f7f2;
+  background: rgba(36, 80, 68, .94);
+  border-color: rgba(245,247,242,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 22px rgba(0,0,0,.30);
+}
 
 .glass-interactive,
 .platform-card,
@@ -222,6 +286,14 @@
   .glass-interactive:hover:not(.photo-viewer-nav),
   .platform-card:hover,
   .travel-card:hover { transform: translateY(-2px); }
+  .platform-card:hover .brand-stage,
+  .travel-card:hover .brand-stage,
+  .whatsapp-card:hover .brand-stage,
+  .payment-card:hover .brand-stage {
+    border-color: rgba(217, 162, 79, .72);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 10px 24px rgba(21,59,51,.18), 0 0 0 1px rgba(217,162,79,.15);
+    transform: translateY(-1px) scale(1.025);
+  }
   .glass-toolbar .icon-button:hover,
   .glass-toolbar .gallery-trigger:hover { color: var(--forest); background: rgba(245, 247, 242, .82); }
   #carousel-toggle:hover { background: var(--gold); }
@@ -234,7 +306,8 @@
   .travel-card::before { transition: none; }
   .glass-interactive,
   .platform-card,
-  .travel-card { transform: none !important; transition: none !important; }
+  .travel-card,
+  .brand-stage { transform: none !important; transition: none !important; }
   .photo-viewer-nav.glass-interactive { transform: translateY(-50%) !important; }
 }
 
@@ -249,9 +322,13 @@
   .glass-regular { --glass-fill: var(--ivory); --glass-rim-a: var(--forest); }
   .glass-clear, .glass-tinted { --glass-fill: var(--forest); --glass-rim-a: var(--ivory); }
   .glass-surface { border-width: 2px; }
+  .brand-stage { border: 2px solid currentColor; }
 }
 
 @media (forced-colors: active) {
-  .glass-surface, .platform-card, .travel-card, .gallery-close, .photo-viewer-nav { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid ButtonText; box-shadow: none; }
+  .glass-surface, .platform-card, .travel-card, .gallery-close, .photo-viewer-nav, .language-selector button, .theme-selector button { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid ButtonText; box-shadow: none; }
   .glass-surface::before, .platform-card::before, .travel-card::before { display: none; }
+  .brand-stage--mask .brand-mark { background: CanvasText; }
+  .brand-stage--native .brand-mark,
+  .brand-stage--adapted .brand-mark { forced-color-adjust: none; }
 }

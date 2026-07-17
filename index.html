@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es-CL">
+<html lang="es-CL" data-theme="dark" data-language="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Cordal Sur: alojamiento para hasta 7 huéspedes en Condominio Andes Chillán, Las Trancas. Consulta disponibilidad y prepara tu viaje.">
-  <meta name="theme-color" content="#153B33">
+  <meta name="theme-color" content="#071914">
   <title>Cordal Sur · Andes Chillán</title>
   <link rel="canonical" href="https://josetomasayalams-rgb.github.io/cordal-sur-linktree/">
   <meta property="og:locale" content="es_CL">
@@ -23,23 +23,44 @@
   <meta name="twitter:description" content="Cordal Sur: alojamiento para hasta 7 huéspedes en Condominio Andes Chillán, Las Trancas. Consulta disponibilidad y prepara tu viaje.">
   <meta name="twitter:image" content="https://josetomasayalams-rgb.github.io/cordal-sur-linktree/assets/photos/11-entorno-02.webp">
   <meta name="twitter:image:alt" content="Atardecer sobre la cordillera cerca de Cordal Sur">
+  <script>
+    document.documentElement.classList.add("js");
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem("cs-linktree-theme-v1") === "light" ? "light" : "dark";
+    } catch {
+      document.documentElement.dataset.theme = "dark";
+    }
+  </script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="glass.css">
+  <script src="preferences.js" defer></script>
   <script src="app.js" defer></script>
   <script src="glass.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Ir al contenido principal</a>
+  <a class="skip-link" href="#main-content" data-i18n="skip.main">Ir al contenido principal</a>
 
   <div class="brand-backdrop" aria-hidden="true">
     <img src="assets/brand/cordal-sur-symbol-reverse.svg" alt="">
   </div>
 
   <main class="page-shell" id="main-content">
-    <header class="site-header">
-      <h1 class="visually-hidden">Cordal Sur, alojamiento en Andes Chillán</h1>
+    <div class="preferences-bar glass-surface glass-regular" data-i18n-aria="preferences.aria" aria-label="Preferencias de visualización">
+      <div class="language-selector" id="language-selector" role="group" data-i18n-aria="language.aria" aria-label="Selector de idioma">
+        <button type="button" data-language-option="es" aria-pressed="true">ES</button>
+        <button type="button" data-language-option="pt" aria-pressed="false">PT</button>
+        <button type="button" data-language-option="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="theme-selector" id="theme-selector" role="group" data-i18n-aria="theme.aria" aria-label="Selector de tema">
+        <button type="button" data-theme-option="light" data-i18n-aria="theme.light" aria-label="Usar tema claro" aria-pressed="false"><span aria-hidden="true">☀</span></button>
+        <button type="button" data-theme-option="dark" data-i18n-aria="theme.dark" aria-label="Usar tema oscuro" aria-pressed="true"><span aria-hidden="true">☾</span></button>
+      </div>
+    </div>
 
-      <section class="hero" aria-label="Fotografías de Cordal Sur">
+    <header class="site-header">
+      <h1 class="visually-hidden" data-i18n="page.heading">Cordal Sur, alojamiento en Andes Chillán</h1>
+
+      <section class="hero" data-i18n-aria="hero.photos" aria-label="Fotografías de Cordal Sur">
         <div class="hero-media" aria-live="off">
           <img class="hero-image is-active" id="hero-layer-a" alt="" decoding="async">
           <img class="hero-image" id="hero-layer-b" alt="" decoding="async">
@@ -59,77 +80,85 @@
             <output class="hero-counter" id="hero-counter" aria-live="polite">1/13</output>
           </div>
 
-          <div class="carousel-controls glass-surface glass-clear glass-toolbar" aria-label="Controles del carrusel">
-            <button class="icon-button glass-interactive" id="carousel-prev" type="button" aria-label="Foto anterior">
+          <div class="carousel-controls glass-surface glass-clear glass-toolbar" data-i18n-aria="carousel.controls" aria-label="Controles del carrusel">
+            <button class="icon-button glass-interactive" id="carousel-prev" type="button" data-i18n-aria="carousel.previous" aria-label="Foto anterior">
               <span aria-hidden="true">←</span>
             </button>
-            <button class="icon-button glass-interactive" id="carousel-toggle" type="button" aria-label="Pausar carrusel" aria-pressed="false">
+            <button class="icon-button glass-interactive" id="carousel-toggle" type="button" data-i18n-aria="carousel.pause" aria-label="Pausar carrusel" aria-pressed="false">
               <span class="pause-mark" aria-hidden="true">Ⅱ</span>
             </button>
-            <button class="icon-button glass-interactive" id="carousel-next" type="button" aria-label="Foto siguiente">
+            <button class="icon-button glass-interactive" id="carousel-next" type="button" data-i18n-aria="carousel.next" aria-label="Foto siguiente">
               <span aria-hidden="true">→</span>
             </button>
-            <button class="gallery-trigger glass-interactive" id="open-gallery" type="button" aria-label="Ver las 38 fotos">
+            <button class="gallery-trigger glass-interactive" id="open-gallery" type="button" data-i18n-aria="gallery.open" aria-label="Ver las 38 fotos">
               <span aria-hidden="true">▦</span>
-              <span class="gallery-label-long">Ver las 38 fotos</span>
+              <span class="gallery-label-long" data-i18n="gallery.open">Ver las 38 fotos</span>
               <span class="gallery-label-short" aria-hidden="true">38</span>
             </button>
           </div>
         </div>
 
         <div class="hero-intro">
-          <p class="eyebrow">Andes Chillán · Las Trancas</p>
-          <h2 class="hero-title">Tu pausa cerca de la montaña</h2>
-          <p>Un refugio acogedor para descansar, compartir y despertar entre bosque, nieve y aire cordillerano.</p>
-          <ul class="stay-facts" aria-label="Características del alojamiento">
-            <li>Hasta 7 huéspedes</li>
-            <li>Condominio Andes Chillán</li>
+          <p class="eyebrow" data-i18n="hero.eyebrow">Andes Chillán · Las Trancas</p>
+          <h2 class="hero-title" data-i18n="hero.title">Tu pausa cerca de la montaña</h2>
+          <p data-i18n="hero.description">Un refugio acogedor para descansar, compartir y despertar entre bosque, nieve y aire cordillerano.</p>
+          <ul class="stay-facts" data-i18n-aria="stay.features" aria-label="Características del alojamiento">
+            <li data-i18n="stay.guests">Hasta 7 huéspedes</li>
+            <li data-i18n="stay.location">Condominio Andes Chillán</li>
           </ul>
         </div>
       </section>
     </header>
 
     <section class="primary-action" aria-labelledby="contact-title">
-      <a class="whatsapp-card glass-surface glass-tinted glass-interactive" id="whatsapp-link">
-        <span class="whatsapp-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-          </svg>
-        </span>
+      <a class="whatsapp-card glass-surface glass-tinted glass-interactive" id="whatsapp-link" data-i18n-aria="contact.aria" aria-label="Contactar por WhatsApp">
+        <span class="whatsapp-icon" id="whatsapp-brand" aria-hidden="true"></span>
         <span class="whatsapp-copy">
-          <span class="whatsapp-question">¿Qué fechas tienes en mente?</span>
-          <strong id="contact-title">Contáctanos por WhatsApp</strong>
-          <small>Indícanos fechas y número de huéspedes</small>
+          <span class="whatsapp-question" data-i18n="contact.question">¿Qué fechas tienes en mente?</span>
+          <strong id="contact-title" data-i18n="contact.title">Contáctanos por WhatsApp</strong>
+          <small data-i18n="contact.detail">Indícanos fechas y número de huéspedes</small>
         </span>
         <span class="whatsapp-arrow" aria-hidden="true">→</span>
       </a>
     </section>
 
+    <section class="payment-section" aria-labelledby="payment-title">
+      <button class="payment-card glass-surface glass-tinted glass-interactive" id="open-payment" type="button" aria-haspopup="dialog" aria-controls="payment-dialog" data-i18n-aria="payment.open" aria-label="Abrir instrucciones para abonar a Cordal Sur">
+        <span class="payment-icon" id="payment-icon" aria-hidden="true"></span>
+        <span class="payment-copy">
+          <span class="payment-kicker" data-i18n="payment.kicker">Pago seguro · Mercado Pago</span>
+          <strong id="payment-title" data-i18n="payment.title">Abona a Cordal Sur</strong>
+          <small data-i18n="payment.detail">Ingresa el monto acordado y paga de forma segura mediante Mercado Pago</small>
+        </span>
+        <span class="payment-arrow" aria-hidden="true">→</span>
+      </button>
+    </section>
+
     <section class="content-section" aria-labelledby="platform-title">
       <div class="section-heading">
-        <p class="eyebrow">Encuentra Cordal Sur</p>
-        <h2 id="platform-title">Reserva o síguenos</h2>
+        <p class="eyebrow" data-i18n="platform.eyebrow">Encuentra Cordal Sur</p>
+        <h2 id="platform-title" data-i18n="platform.title">Reserva o síguenos</h2>
       </div>
       <div class="platform-grid glass-surface glass-regular glass-tray" id="platform-links"></div>
     </section>
 
     <section class="content-section travel-section" aria-labelledby="travel-title">
       <div class="section-heading">
-        <p class="eyebrow">Antes de subir</p>
-        <h2 id="travel-title">Prepara tu viaje</h2>
-        <p>Consulta las condiciones de la montaña y ubica el alojamiento antes de salir.</p>
+        <p class="eyebrow" data-i18n="travel.eyebrow">Antes de subir</p>
+        <h2 id="travel-title" data-i18n="travel.title">Prepara tu viaje</h2>
+        <p data-i18n="travel.description">Consulta las condiciones de la montaña y ubica el alojamiento antes de salir.</p>
       </div>
       <div class="travel-grid glass-surface glass-regular glass-tray" id="travel-links"></div>
     </section>
 
     <button class="share-button glass-surface glass-regular glass-interactive" id="share" type="button">
       <span aria-hidden="true">↗</span>
-      Compartir Cordal Sur
+      <span data-share-label data-i18n="share.default">Compartir Cordal Sur</span>
     </button>
 
     <footer class="site-footer">
       <span class="footer-mark" aria-hidden="true"></span>
-      <p>Cordal Sur · Condominio Andes Chillán · Las Trancas, Chile</p>
+      <p data-i18n="footer.text">Cordal Sur · Condominio Andes Chillán · Las Trancas, Chile</p>
     </footer>
   </main>
 
@@ -137,11 +166,11 @@
     <div class="gallery-dialog-inner">
       <header class="gallery-header">
         <div>
-          <p class="eyebrow">Conoce el departamento</p>
-          <h2 id="gallery-title">Galería Cordal Sur</h2>
-          <p id="gallery-description">38 fotografías agrupadas por ambiente.</p>
+          <p class="eyebrow" data-i18n="gallery.kicker">Conoce el departamento</p>
+          <h2 id="gallery-title" data-i18n="gallery.title">Galería Cordal Sur</h2>
+          <p id="gallery-description" data-i18n="gallery.description">38 fotografías agrupadas por ambiente.</p>
         </div>
-        <button class="gallery-close glass-interactive" id="gallery-close" type="button" aria-label="Cerrar galería">×</button>
+        <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">×</button>
       </header>
       <div class="gallery-grid" id="gallery-grid"></div>
     </div>
@@ -149,10 +178,42 @@
 
   <dialog class="gallery-dialog photo-viewer" id="photo-viewer" aria-labelledby="photo-viewer-caption">
     <div class="photo-viewer-inner">
-      <button class="gallery-close photo-viewer-close glass-interactive" id="photo-viewer-close" type="button" aria-label="Cerrar foto ampliada">×</button>
-      <button class="icon-button photo-viewer-nav photo-viewer-prev glass-interactive" id="photo-viewer-prev" type="button" aria-label="Foto anterior">←</button>
+      <button class="gallery-close photo-viewer-close glass-interactive" id="photo-viewer-close" type="button" data-i18n-aria="gallery.viewer.close" aria-label="Cerrar foto ampliada">×</button>
+      <button class="icon-button photo-viewer-nav photo-viewer-prev glass-interactive" id="photo-viewer-prev" type="button" data-i18n-aria="carousel.previous" aria-label="Foto anterior">←</button>
       <figure><img id="photo-viewer-image" alt=""><figcaption id="photo-viewer-caption"></figcaption></figure>
-      <button class="icon-button photo-viewer-nav photo-viewer-next glass-interactive" id="photo-viewer-next" type="button" aria-label="Foto siguiente">→</button>
+      <button class="icon-button photo-viewer-nav photo-viewer-next glass-interactive" id="photo-viewer-next" type="button" data-i18n-aria="carousel.next" aria-label="Foto siguiente">→</button>
+    </div>
+  </dialog>
+
+  <dialog class="payment-dialog" id="payment-dialog" aria-labelledby="payment-dialog-title" aria-describedby="payment-dialog-description">
+    <div class="payment-dialog-inner">
+      <header class="payment-dialog-header">
+        <div>
+          <p class="eyebrow" data-i18n="payment.dialog.kicker">Pago seguro</p>
+          <h2 id="payment-dialog-title" data-i18n="payment.dialog.title">Antes de pagar</h2>
+        </div>
+        <button class="payment-dialog-close glass-interactive" id="payment-close" type="button" data-i18n-aria="payment.dialog.close" aria-label="Cerrar instrucciones de pago">×</button>
+      </header>
+
+      <div class="payment-dialog-body">
+        <p id="payment-dialog-description" data-i18n="payment.dialog.description">Serás dirigido al canal de pago de Cordal Sur en Mercado Pago.</p>
+        <ol class="payment-steps">
+          <li data-i18n="payment.step.amount">Ingresa únicamente el monto acordado para tu reserva.</li>
+          <li data-i18n="payment.step.review">Revisa el monto antes de elegir el medio de pago.</li>
+          <li data-i18n="payment.step.receipt">Cuando finalices, envía el comprobante por WhatsApp.</li>
+        </ol>
+        <p class="payment-destination"><span aria-hidden="true">✓</span> <span data-i18n="payment.destination">Destino seguro:</span> <strong>link.mercadopago.cl</strong></p>
+      </div>
+
+      <div class="payment-dialog-actions">
+        <a class="payment-dialog-action payment-dialog-primary glass-surface glass-tinted glass-interactive" id="payment-continue" target="_blank" rel="noopener noreferrer" data-i18n-aria="payment.continue.aria">
+          <span data-i18n="payment.continue">Continuar a Mercado Pago</span> <span aria-hidden="true">↗</span>
+        </a>
+        <a class="payment-dialog-action payment-dialog-secondary glass-surface glass-regular glass-interactive" id="payment-receipt" target="_blank" rel="noopener noreferrer" data-i18n-aria="payment.receipt.aria">
+          <span data-i18n="payment.receipt">Enviar comprobante por WhatsApp</span>
+        </a>
+        <button class="payment-dialog-cancel" id="payment-cancel" type="button" data-i18n="payment.cancel">Cancelar</button>
+      </div>
     </div>
   </dialog>
 

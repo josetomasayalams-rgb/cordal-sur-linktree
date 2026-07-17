@@ -1,121 +1,175 @@
 "use strict";
 
+const PREFERENCES = window.CS_LINKTREE_PREFERENCES;
+if (!PREFERENCES) throw new Error("Cordal Sur preferences failed to initialize.");
+const t = (key, values) => values ? PREFERENCES.format(key, values) : PREFERENCES.t(key);
+const WHATSAPP_PHONE = "56990137732";
+
+const BRAND_ASSETS = Object.freeze({
+  whatsapp: Object.freeze({
+    src: "assets/brands/whatsapp-glyph.svg",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  mercadopago: Object.freeze({
+    src: "assets/brands/mercado-pago-handshake.svg",
+    type: "glyph",
+    treatment: "adapted"
+  }),
+  airbnb: Object.freeze({
+    src: "assets/brands/airbnb-belo.svg",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  booking: Object.freeze({
+    src: "assets/brands/booking-wordmark.svg",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  instagram: Object.freeze({
+    src: "assets/brands/instagram-glyph.png",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  snowForecast: Object.freeze({
+    src: "assets/brands/snow-forecast-wordmark.png",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  nevados: Object.freeze({
+    src: "assets/brands/nevados-de-chillan-wordmark.svg",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  googleMaps: Object.freeze({
+    src: "assets/brands/google-maps-icon.png",
+    type: "glyph",
+    treatment: "native"
+  })
+});
+
 const LINKS = Object.freeze([
   Object.freeze({
     id: "whatsapp",
     group: "primary",
-    label: "Contactar por WhatsApp",
-    url: "https://wa.me/56990137732?text=Hola%20Cordal%20Sur%2C%20quiero%20consultar%20disponibilidad.%20Mis%20fechas%20son%20del%20___%20al%20___%20y%20somos%20___%20hu%C3%A9spedes."
+    labelKey: "contact.aria",
+    messageKey: "contact.message",
+    brandKey: "whatsapp"
+  }),
+  Object.freeze({
+    id: "mercadopago",
+    group: "payment",
+    labelKey: "payment.title",
+    detailKey: "payment.detail",
+    brandKey: "mercadopago",
+    url: "https://link.mercadopago.cl/carhartt"
+  }),
+  Object.freeze({
+    id: "payment-receipt",
+    group: "payment-receipt",
+    labelKey: "payment.receipt",
+    messageKey: "payment.receipt.message"
   }),
   Object.freeze({
     id: "airbnb",
     group: "platform",
-    label: "Airbnb",
-    detail: "Ver alojamiento y reservar",
-    icon: "house",
+    labelKey: "link.airbnb.label",
+    detailKey: "link.airbnb.detail",
+    brandKey: "airbnb",
     url: "https://www.airbnb.cl/rooms/1729206776074121490"
   }),
   Object.freeze({
     id: "booking",
     group: "platform",
-    label: "Booking.com",
-    detail: "Consultar fechas disponibles",
-    icon: "calendar",
+    labelKey: "link.booking.label",
+    detailKey: "link.booking.detail",
+    brandKey: "booking",
     url: "https://www.booking.com/hotel/cl/departamento-en-condominio-andes-chillan.html"
   }),
   Object.freeze({
     id: "instagram",
     group: "platform",
-    label: "Instagram",
-    detail: "Síguenos en @cordal_sur",
-    icon: "camera",
+    labelKey: "link.instagram.label",
+    detailKey: "link.instagram.detail",
+    brandKey: "instagram",
     url: "https://www.instagram.com/cordal_sur/"
   }),
   Object.freeze({
     id: "forecast",
     group: "travel",
-    label: "Pronóstico de nieve",
-    detail: "Snow-Forecast · Nevados de Chillán",
-    icon: "snow",
+    labelKey: "link.forecast.label",
+    detailKey: "link.forecast.detail",
+    brandKey: "snowForecast",
     url: "https://www.snow-forecast.com/resorts/Chillan/6day/mid"
   }),
   Object.freeze({
     id: "mountain",
     group: "travel",
-    label: "Reporte oficial de montaña",
-    detail: "Información oficial de Nevados",
-    icon: "mountain",
+    labelKey: "link.mountain.label",
+    detailKey: "link.mountain.detail",
+    brandKey: "nevados",
     url: "https://www.nevadosdechillan.com/reporte-montana"
   }),
   Object.freeze({
     id: "maps",
     group: "travel",
-    label: "Cómo llegar",
-    detail: "Condominio Andes Chillán en Maps",
-    icon: "pin",
+    labelKey: "link.maps.label",
+    detailKey: "link.maps.detail",
+    brandKey: "googleMaps",
     url: "https://www.google.com/maps/search/?api=1&query=Condominio+Andes+Chill%C3%A1n%2C+Las+Trancas%2C+Chile"
   })
 ]);
 
 const PHOTO_GROUPS = Object.freeze([
-  Object.freeze({ id: "principal", title: "Dormitorio principal", slug: "01-dormitorio-principal", files: [1, 3], captions: ["Vista general", "Detalles del dormitorio"] }),
-  Object.freeze({ id: "futon", title: "Dormitorio con futón", slug: "02-dormitorio-futon", captions: ["Futón como sofá", "Vista del dormitorio", "Iluminación natural", "Espacio de guardado", "Detalles del ambiente", "Acceso al dormitorio", "Zona de descanso", "Rincón del dormitorio", "Vista general", "Futón preparado como cama"] }),
-  Object.freeze({ id: "literas", title: "Dormitorio con literas", slug: "03-dormitorio-literas", captions: ["Vista del dormitorio", "Literas", "Escalera y protecciones", "Iluminación natural", "Espacio para descansar", "Detalles del ambiente", "Vista lateral", "Acceso al dormitorio", "Rincón de las literas", "Vista general"] }),
-  Object.freeze({ id: "banos", title: "Baños", slug: "04-banos", captions: ["Baño principal", "Lavamanos y espejo", "Ducha", "Vista general", "Segundo baño"] }),
-  Object.freeze({ id: "cocina", title: "Cocina", slug: "05-cocina", captions: ["Cocina equipada", "Cubierta y almacenamiento"] }),
-  Object.freeze({ id: "sala", title: "Sala", slug: "06-sala", captions: ["Sala de estar", "Espacio para compartir"] }),
-  Object.freeze({ id: "comedor", title: "Comedor", slug: "07-comedor", captions: ["Comedor", "Vista hacia la cocina"] }),
-  Object.freeze({ id: "balcon", title: "Balcón", slug: "08-balcon", captions: ["Balcón y vista"] }),
-  Object.freeze({ id: "exterior", title: "Exterior", slug: "09-exterior", captions: ["Exterior del condominio"] }),
-  Object.freeze({ id: "piscina", title: "Piscina", slug: "10-piscina", captions: ["Piscina del condominio"] }),
-  Object.freeze({ id: "entorno", title: "Entorno", slug: "11-entorno", captions: ["Camino nevado", "Atardecer en la cordillera"] })
+  Object.freeze({ id: "principal", titleKey: "photo.principal.title", slug: "01-dormitorio-principal", files: [1, 3], count: 2 }),
+  Object.freeze({ id: "futon", titleKey: "photo.futon.title", slug: "02-dormitorio-futon", count: 10 }),
+  Object.freeze({ id: "literas", titleKey: "photo.literas.title", slug: "03-dormitorio-literas", count: 10 }),
+  Object.freeze({ id: "banos", titleKey: "photo.banos.title", slug: "04-banos", count: 5 }),
+  Object.freeze({ id: "cocina", titleKey: "photo.cocina.title", slug: "05-cocina", count: 2 }),
+  Object.freeze({ id: "sala", titleKey: "photo.sala.title", slug: "06-sala", count: 2 }),
+  Object.freeze({ id: "comedor", titleKey: "photo.comedor.title", slug: "07-comedor", count: 2 }),
+  Object.freeze({ id: "balcon", titleKey: "photo.balcon.title", slug: "08-balcon", count: 1 }),
+  Object.freeze({ id: "exterior", titleKey: "photo.exterior.title", slug: "09-exterior", count: 1 }),
+  Object.freeze({ id: "piscina", titleKey: "photo.piscina.title", slug: "10-piscina", count: 1 }),
+  Object.freeze({ id: "entorno", titleKey: "photo.entorno.title", slug: "11-entorno", count: 2 })
 ]);
 
 const GALLERY_PHOTOS = Object.freeze(PHOTO_GROUPS.flatMap((group) =>
-  group.captions.map((caption, index) => Object.freeze({
-    category: group.title,
+  Array.from({ length: group.count }, (_, index) => Object.freeze({
+    categoryKey: group.titleKey,
+    captionKey: `photo.${group.id}.${index}`,
     groupId: group.id,
-    src: `assets/photos/${group.slug}-${String(group.files?.[index] ?? index + 1).padStart(2, "0")}.webp`,
-    alt: `${group.title} de Cordal Sur: ${caption.toLocaleLowerCase("es-CL")}`,
-    caption
+    src: `assets/photos/${group.slug}-${String(group.files?.[index] ?? index + 1).padStart(2, "0")}.webp`
   }))
 ));
 
 const HERO_SEQUENCE = Object.freeze([
-  ["01-dormitorio-principal-03", "Dormitorio principal"],
-  ["06-sala-01", "Sala de estar"],
-  ["07-comedor-01", "Comedor"],
-  ["05-cocina-01", "Cocina equipada"],
-  ["02-dormitorio-futon-01", "Futón como sofá"],
-  ["02-dormitorio-futon-10", "Futón preparado como cama"],
-  ["03-dormitorio-literas-10", "Dormitorio con literas"],
-  ["04-banos-04", "Baño"],
-  ["08-balcon-01", "Balcón"],
-  ["09-exterior-01", "Exterior del condominio"],
-  ["10-piscina-01", "Piscina"],
-  ["11-entorno-01", "Camino nevado"],
-  ["11-entorno-02", "Atardecer en la cordillera"]
+  ["01-dormitorio-principal-03", "photo.principal.title"],
+  ["06-sala-01", "photo.sala.0"],
+  ["07-comedor-01", "photo.comedor.0"],
+  ["05-cocina-01", "photo.cocina.0"],
+  ["02-dormitorio-futon-01", "photo.futon.0"],
+  ["02-dormitorio-futon-10", "photo.futon.9"],
+  ["03-dormitorio-literas-10", "photo.literas.title"],
+  ["04-banos-04", "hero.caption.bathroom"],
+  ["08-balcon-01", "photo.balcon.title"],
+  ["09-exterior-01", "photo.exterior.0"],
+  ["10-piscina-01", "photo.piscina.title"],
+  ["11-entorno-01", "photo.entorno.0"],
+  ["11-entorno-02", "photo.entorno.1"]
 ]);
 
-const HERO_PHOTOS = Object.freeze(HERO_SEQUENCE.map(([basename, caption]) => {
+const HERO_PHOTOS = Object.freeze(HERO_SEQUENCE.map(([basename, captionKey]) => {
   const photo = GALLERY_PHOTOS.find(({ src }) => src.endsWith(`/${basename}.webp`));
-  return Object.freeze({ ...photo, caption });
+  return Object.freeze({ ...photo, captionKey });
 }));
 
-Object.assign(window, { LINKS, HERO_PHOTOS, GALLERY_PHOTOS });
-
-const ICONS = Object.freeze({
-  house: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 23.5 24 9l17 14.5"/><path d="M11 21v19h26V21M20 40V28h8v12"/></svg>',
-  calendar: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="10" width="34" height="31" rx="5"/><path d="M15 6v8M33 6v8M7 19h34M16 30l5 5 11-11"/></svg>',
-  camera: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="7" width="34" height="34" rx="10"/><circle cx="24" cy="24" r="8"/><circle cx="34.5" cy="13.5" r="1.5" class="icon-fill"/></svg>',
-  snow: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 5v38M7.5 14.5l33 19M7.5 33.5l33-19M18 9l6 6 6-6M18 39l6-6 6 6M8 22l8 2-2 8M40 26l-8-2 2-8"/></svg>',
-  mountain: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="m4 39 13-23 6 10 6-17 15 30H4Z"/><path d="m13 23 4 4 4-4M25 19l4 5 4-5"/></svg>',
-  pin: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M38 20c0 11-14 23-14 23S10 31 10 20a14 14 0 1 1 28 0Z"/><circle cx="24" cy="20" r="5"/></svg>'
-});
+Object.assign(window, { LINKS, BRAND_ASSETS, HERO_PHOTOS, GALLERY_PHOTOS });
 
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
-  "www.snow-forecast.com", "www.nevadosdechillan.com", "www.google.com"
+  "www.snow-forecast.com", "www.nevadosdechillan.com", "www.google.com",
+  "link.mercadopago.cl"
 ]);
 
 function safeHref(value) {
@@ -127,37 +181,87 @@ function safeHref(value) {
   }
 }
 
+function whatsappHref(messageKey) {
+  const url = new URL(`https://wa.me/${WHATSAPP_PHONE}`);
+  url.searchParams.set("text", t(messageKey));
+  return safeHref(url.href);
+}
+
+function linkHref(link) {
+  return link.messageKey ? whatsappHref(link.messageKey) : safeHref(link.url);
+}
+
+function photoAlt(photo) {
+  return t("gallery.photo.alt", { category: t(photo.categoryKey), caption: t(photo.captionKey) });
+}
+
+function populateBrandStage(stage, brandKey) {
+  const asset = BRAND_ASSETS[brandKey];
+  if (!stage || !asset) return false;
+
+  stage.classList.add(
+    "brand-stage",
+    `brand-stage--${asset.type}`,
+    `brand-stage--${asset.treatment}`,
+    `brand-stage--${brandKey}`
+  );
+  stage.dataset.brand = brandKey;
+  stage.setAttribute("aria-hidden", "true");
+
+  if (asset.treatment !== "mask") {
+    const image = document.createElement("img");
+    image.className = "brand-mark";
+    image.src = asset.src;
+    image.alt = "";
+    image.decoding = "async";
+    stage.replaceChildren(image);
+    return true;
+  }
+
+  const mark = document.createElement("span");
+  mark.className = "brand-mark";
+  mark.style.setProperty("--brand-mask-image", `url("${asset.src}")`);
+  stage.replaceChildren(mark);
+  return true;
+}
+
+function createBrandStage(brandKey, type) {
+  const stage = document.createElement("span");
+  stage.className = `${type}-icon`;
+  return populateBrandStage(stage, brandKey) ? stage : null;
+}
+
 function renderLinks(container, links, type) {
   if (!container) return;
   const fragment = document.createDocumentFragment();
   links.forEach((link) => {
-    const href = safeHref(link.url);
+    const href = linkHref(link);
     if (!href) return;
+    const labelText = t(link.labelKey);
+    const detailText = t(link.detailKey);
     const anchor = document.createElement("a");
     anchor.className = `${type}-card`;
     anchor.href = href;
-    anchor.setAttribute("aria-label", `${link.label}. ${link.detail}`);
+    anchor.setAttribute("aria-label", `${labelText}. ${detailText}`);
 
-    const icon = document.createElement("span");
-    icon.className = `${type}-icon`;
-    icon.innerHTML = ICONS[link.icon];
-    anchor.append(icon);
+    const brandStage = createBrandStage(link.brandKey, type);
+    if (brandStage) anchor.append(brandStage);
 
     if (type === "platform") {
       const label = document.createElement("strong");
       label.className = "platform-label";
-      label.textContent = link.label;
+      label.textContent = labelText;
       const detail = document.createElement("span");
       detail.className = "platform-detail";
-      detail.textContent = link.detail;
+      detail.textContent = detailText;
       anchor.append(label, detail);
     } else {
       const copy = document.createElement("span");
       copy.className = "travel-copy";
       const label = document.createElement("strong");
-      label.textContent = link.label;
+      label.textContent = labelText;
       const detail = document.createElement("small");
-      detail.textContent = link.detail;
+      detail.textContent = detailText;
       copy.append(label, detail);
       const arrow = document.createElement("span");
       arrow.className = "travel-arrow";
@@ -173,14 +277,80 @@ function renderLinks(container, links, type) {
 function initializeLinks() {
   const whatsapp = LINKS.find(({ id }) => id === "whatsapp");
   const whatsappAnchor = document.querySelector("#whatsapp-link");
-  if (whatsappAnchor) {
-    whatsappAnchor.href = safeHref(whatsapp.url) || "#";
-    whatsappAnchor.setAttribute("aria-label", whatsapp.label);
-    whatsappAnchor.removeAttribute("target");
-    whatsappAnchor.removeAttribute("rel");
+  const whatsappBrand = document.querySelector("#whatsapp-brand");
+  if (whatsappBrand) populateBrandStage(whatsappBrand, whatsapp.brandKey);
+  const render = () => {
+    if (whatsappAnchor) {
+      whatsappAnchor.href = linkHref(whatsapp) || "#";
+      whatsappAnchor.setAttribute("aria-label", t(whatsapp.labelKey));
+      whatsappAnchor.removeAttribute("target");
+      whatsappAnchor.removeAttribute("rel");
+    }
+    renderLinks(document.querySelector("#platform-links"), LINKS.filter(({ group }) => group === "platform"), "platform");
+    renderLinks(document.querySelector("#travel-links"), LINKS.filter(({ group }) => group === "travel"), "travel");
+  };
+  render();
+  PREFERENCES.subscribe(({ changed }) => { if (changed === "language") render(); });
+}
+
+function initializePayment() {
+  const payment = LINKS.find(({ id }) => id === "mercadopago");
+  const receipt = LINKS.find(({ id }) => id === "payment-receipt");
+  const dialog = document.querySelector("#payment-dialog");
+  const openButton = document.querySelector("#open-payment");
+  const closeButton = document.querySelector("#payment-close");
+  const cancelButton = document.querySelector("#payment-cancel");
+  const continueLink = document.querySelector("#payment-continue");
+  const receiptLink = document.querySelector("#payment-receipt");
+  const icon = document.querySelector("#payment-icon");
+  if (!payment || !receipt || !dialog || !openButton || !closeButton || !cancelButton || !continueLink || !receiptLink || !icon) return;
+
+  const paymentHref = linkHref(payment);
+  if (!paymentHref || !linkHref(receipt)) {
+    openButton.disabled = true;
+    openButton.setAttribute("aria-disabled", "true");
+    return;
   }
-  renderLinks(document.querySelector("#platform-links"), LINKS.filter(({ group }) => group === "platform"), "platform");
-  renderLinks(document.querySelector("#travel-links"), LINKS.filter(({ group }) => group === "travel"), "travel");
+
+  populateBrandStage(icon, payment.brandKey);
+  continueLink.href = paymentHref;
+  const syncLanguage = () => {
+    receiptLink.href = linkHref(receipt) || "#";
+    continueLink.setAttribute("aria-label", t("payment.continue.aria"));
+    receiptLink.setAttribute("aria-label", t("payment.receipt.aria"));
+  };
+  syncLanguage();
+  PREFERENCES.subscribe(({ changed }) => { if (changed === "language") syncLanguage(); });
+
+  let returnFocus = openButton;
+  const close = () => {
+    if (dialog.open && typeof dialog.close === "function") {
+      dialog.close();
+      return;
+    }
+    dialog.removeAttribute("open");
+    returnFocus?.focus();
+  };
+
+  openButton.addEventListener("click", () => {
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : openButton;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+    continueLink.focus();
+  });
+  closeButton.addEventListener("click", close);
+  cancelButton.addEventListener("click", close);
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener("close", () => returnFocus?.focus());
 }
 
 function initializeCarousel() {
@@ -213,9 +383,9 @@ function initializeCarousel() {
     return currentIndex;
   };
   const assignPhoto = (layer, photo) => {
+    layer.alt = photoAlt(photo);
     if (layer.dataset.photo !== photo.src) {
       layer.dataset.photo = photo.src;
-      layer.alt = photo.alt;
       layer.src = photo.src;
     }
   };
@@ -233,7 +403,7 @@ function initializeCarousel() {
   };
   const updateMeta = () => {
     const photo = HERO_PHOTOS[currentIndex];
-    caption.textContent = photo.caption;
+    caption.textContent = t(photo.captionKey);
     counter.textContent = `${currentIndex + 1}/${HERO_PHOTOS.length}`;
   };
   const updateToggle = () => {
@@ -241,14 +411,14 @@ function initializeCarousel() {
     toggle.disabled = reduceMotion.matches;
     if (reduceMotion.matches) {
       toggle.setAttribute("aria-pressed", "true");
-      toggle.setAttribute("aria-label", "Carrusel pausado por preferencia de movimiento reducido");
+      toggle.setAttribute("aria-label", t("carousel.reduced"));
       const mark = toggle.querySelector(".pause-mark");
       if (mark) mark.textContent = "Ⅱ";
       return;
     }
     const paused = manuallyPaused || reduceMotion.matches;
     toggle.setAttribute("aria-pressed", String(paused));
-    toggle.setAttribute("aria-label", paused ? "Reanudar carrusel" : "Pausar carrusel");
+    toggle.setAttribute("aria-label", t(paused ? "carousel.resume" : "carousel.pause"));
     const mark = toggle.querySelector(".pause-mark");
     if (mark) mark.textContent = paused ? "▶" : "Ⅱ";
   };
@@ -312,6 +482,14 @@ function initializeCarousel() {
     updateToggle();
     scheduleAutoplay();
   });
+  PREFERENCES.subscribe(({ changed }) => {
+    if (changed !== "language") return;
+    assignPhoto(activeLayer, HERO_PHOTOS[currentIndex]);
+    const standbyPhoto = HERO_PHOTOS.find(({ src }) => src === standbyLayer.dataset.photo);
+    if (standbyPhoto) assignPhoto(standbyLayer, standbyPhoto);
+    updateMeta();
+    updateToggle();
+  });
 
   const swipeSurface = layerA.closest(".hero-media") || layerA.parentElement;
   let swipeStart = null;
@@ -361,8 +539,8 @@ function initializeGallery() {
     viewerIndex = (index + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length;
     const photo = GALLERY_PHOTOS[viewerIndex];
     viewerImage.src = photo.src;
-    viewerImage.alt = photo.alt;
-    viewerCaption.textContent = `${photo.category} · ${photo.caption} · ${viewerIndex + 1}/${GALLERY_PHOTOS.length}`;
+    viewerImage.alt = photoAlt(photo);
+    viewerCaption.textContent = `${t(photo.categoryKey)} · ${t(photo.captionKey)} · ${viewerIndex + 1}/${GALLERY_PHOTOS.length}`;
   };
   const closeViewer = () => viewer.open ? viewer.close() : viewer.removeAttribute("open");
   const openViewer = (index, trigger) => {
@@ -383,7 +561,8 @@ function initializeGallery() {
       const title = document.createElement("h3");
       title.className = "gallery-group-title";
       title.id = `gallery-group-${group.id}`;
-      title.textContent = `${group.title} · ${group.captions.length}`;
+      title.dataset.galleryGroupId = group.id;
+      title.textContent = `${t(group.titleKey)} · ${group.count}`;
       const photos = document.createElement("div");
       photos.className = "gallery-group-grid";
       GALLERY_PHOTOS.filter(({ groupId }) => groupId === group.id).forEach((photo) => {
@@ -393,17 +572,17 @@ function initializeGallery() {
         imageButton.className = "gallery-image-button";
         imageButton.type = "button";
         imageButton.dataset.galleryIndex = String(GALLERY_PHOTOS.indexOf(photo));
-        imageButton.setAttribute("aria-label", `Ampliar ${photo.alt}`);
+        imageButton.setAttribute("aria-label", t("gallery.expand", { description: photoAlt(photo) }));
         const image = document.createElement("img");
         image.src = photo.src;
-        image.alt = photo.alt;
+        image.alt = photoAlt(photo);
         image.loading = "lazy";
         image.decoding = "async";
         image.width = 960;
         image.height = 720;
         image.addEventListener("error", () => figure.classList.add("is-unavailable"), { once: true });
         const figcaption = document.createElement("figcaption");
-        figcaption.textContent = photo.caption;
+        figcaption.textContent = t(photo.captionKey);
         imageButton.append(image);
         figure.append(imageButton, figcaption);
         photos.append(figure);
@@ -413,6 +592,24 @@ function initializeGallery() {
     });
     grid.append(fragment);
     populated = true;
+  };
+  const translatePopulated = () => {
+    if (!populated) return;
+    grid.querySelectorAll("[data-gallery-group-id]").forEach((title) => {
+      const group = PHOTO_GROUPS.find(({ id }) => id === title.dataset.galleryGroupId);
+      if (group) title.textContent = `${t(group.titleKey)} · ${group.count}`;
+    });
+    grid.querySelectorAll(".gallery-image-button").forEach((button) => {
+      const photo = GALLERY_PHOTOS[Number(button.dataset.galleryIndex)];
+      if (!photo) return;
+      const image = button.querySelector("img");
+      const caption = button.closest("figure")?.querySelector("figcaption");
+      const alt = photoAlt(photo);
+      button.setAttribute("aria-label", t("gallery.expand", { description: alt }));
+      if (image) image.alt = alt;
+      if (caption) caption.textContent = t(photo.captionKey);
+    });
+    if (viewer.open) showViewerPhoto(viewerIndex);
   };
   const close = () => dialog.open ? dialog.close() : dialog.removeAttribute("open");
 
@@ -445,19 +642,29 @@ function initializeGallery() {
     if (event.key === "ArrowRight") showViewerPhoto(viewerIndex + 1);
   });
   viewer.addEventListener("close", () => viewerReturn?.focus());
+  PREFERENCES.subscribe(({ changed }) => { if (changed === "language") translatePopulated(); });
 }
 
 function initializeShare() {
   const button = document.querySelector("#share");
   if (!button) return;
-  const originalMarkup = button.innerHTML;
-  const shareUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href.split(/[?#]/)[0], shareTitle = document.title, shareText = document.querySelector('meta[name="description"]')?.content || "Conoce Cordal Sur.";
+  const shareUrl = document.querySelector('link[rel="canonical"]')?.href || window.location.href.split(/[?#]/)[0];
   let restoreTimer = 0;
-  const showStatus = (message) => {
+  const renderDefault = () => {
+    const icon = document.createElement("span");
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "↗";
+    const label = document.createElement("span");
+    label.dataset.shareLabel = "";
+    label.textContent = t("share.default");
+    button.replaceChildren(icon, label);
+    button.removeAttribute("aria-live");
+  };
+  const showStatus = (key) => {
     window.clearTimeout(restoreTimer);
-    button.textContent = message;
+    button.textContent = t(key);
     button.setAttribute("aria-live", "polite");
-    restoreTimer = window.setTimeout(() => { button.innerHTML = originalMarkup; }, 2200);
+    restoreTimer = window.setTimeout(renderDefault, 2200);
   };
   const copy = async (text) => {
     if (navigator.clipboard?.writeText) {
@@ -477,22 +684,28 @@ function initializeShare() {
   button.addEventListener("click", async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-        showStatus("¡Gracias por compartir!");
+        await navigator.share({ title: document.title, text: t("share.text"), url: shareUrl });
+        showStatus("share.thanks");
         return;
       } catch (error) {
         if (error?.name === "AbortError") return;
       }
     }
     try {
-      showStatus(await copy(shareUrl) ? "Enlace copiado" : "No fue posible copiar el enlace");
+      showStatus(await copy(shareUrl) ? "share.copied" : "share.error");
     } catch {
-      showStatus("No fue posible copiar el enlace");
+      showStatus("share.error");
     }
+  });
+  PREFERENCES.subscribe(({ changed }) => {
+    if (changed !== "language") return;
+    window.clearTimeout(restoreTimer);
+    renderDefault();
   });
 }
 
 initializeLinks();
+initializePayment();
 initializeCarousel();
 initializeGallery();
 initializeShare();
