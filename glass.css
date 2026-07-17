@@ -329,5 +329,6 @@ html[data-theme="dark"] .payment-dialog-close {
   .glass-surface, .platform-card, .travel-card, .gallery-close, .photo-viewer-nav, .language-selector button, .theme-selector button { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid ButtonText; box-shadow: none; }
   .glass-surface::before, .platform-card::before, .travel-card::before { display: none; }
   .brand-stage--mask .brand-mark { background: CanvasText; }
-  .brand-stage--native .brand-mark { forced-color-adjust: none; }
+  .brand-stage--native .brand-mark,
+  .brand-stage--adapted .brand-mark { forced-color-adjust: none; }
 }

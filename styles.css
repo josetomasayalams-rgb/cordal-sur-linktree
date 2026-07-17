@@ -467,7 +467,8 @@ a { color: inherit; }
   -webkit-mask: var(--brand-mask-image) center / contain no-repeat;
   mask: var(--brand-mask-image) center / contain no-repeat;
 }
-.brand-stage--native .brand-mark { object-fit: contain; }
+.brand-stage--native .brand-mark,
+.brand-stage--adapted .brand-mark { object-fit: contain; }
 .whatsapp-icon .brand-mark { width: 42px; height: 42px; }
 .payment-icon .brand-mark { width: 50px; height: 50px; }
 .platform-icon .brand-mark { width: 42px; height: 42px; }

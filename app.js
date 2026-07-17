@@ -14,7 +14,7 @@ const BRAND_ASSETS = Object.freeze({
   mercadopago: Object.freeze({
     src: "assets/brands/mercado-pago-handshake.svg",
     type: "glyph",
-    treatment: "native"
+    treatment: "adapted"
   }),
   airbnb: Object.freeze({
     src: "assets/brands/airbnb-belo.svg",
@@ -208,7 +208,7 @@ function populateBrandStage(stage, brandKey) {
   stage.dataset.brand = brandKey;
   stage.setAttribute("aria-hidden", "true");
 
-  if (asset.treatment === "native") {
+  if (asset.treatment !== "mask") {
     const image = document.createElement("img");
     image.className = "brand-mark";
     image.src = asset.src;
