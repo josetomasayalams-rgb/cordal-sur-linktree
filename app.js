@@ -247,15 +247,7 @@ function renderLinks(container, links, type) {
     const brandStage = createBrandStage(link.brandKey, type);
     if (brandStage) anchor.append(brandStage);
 
-    if (type === "platform") {
-      const label = document.createElement("strong");
-      label.className = "platform-label";
-      label.textContent = labelText;
-      const detail = document.createElement("span");
-      detail.className = "platform-detail";
-      detail.textContent = detailText;
-      anchor.append(label, detail);
-    } else {
+    if (type !== "platform") {
       const copy = document.createElement("span");
       copy.className = "travel-copy";
       const label = document.createElement("strong");
