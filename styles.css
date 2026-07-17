@@ -350,7 +350,7 @@ a { color: inherit; }
 .whatsapp-card {
   min-height: 132px;
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr) 28px;
+  grid-template-columns: 64px minmax(0, 1fr) 28px;
   align-items: center;
   gap: 14px;
   padding: 20px 18px;
@@ -359,14 +359,13 @@ a { color: inherit; }
   text-decoration: none;
 }
 .whatsapp-icon {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   display: grid;
   place-items: center;
   color: var(--ivory);
-  border-radius: 50%;
+  border-radius: 22px;
 }
-.whatsapp-icon svg { width: 36px; height: 41px; fill: currentColor; }
 .whatsapp-copy { min-width: 0; }
 .whatsapp-copy span, .whatsapp-copy strong, .whatsapp-copy small { display: block; }
 .whatsapp-question { margin-bottom: 4px; color: var(--glacial); font-size: .7rem; font-weight: 600; letter-spacing: .03em; }
@@ -378,7 +377,7 @@ a { color: inherit; }
   width: 100%;
   min-height: 132px;
   display: grid;
-  grid-template-columns: 60px minmax(0, 1fr) 28px;
+  grid-template-columns: 68px minmax(0, 1fr) 28px;
   align-items: center;
   gap: 14px;
   padding: 20px 18px;
@@ -390,14 +389,13 @@ a { color: inherit; }
 }
 .payment-card:disabled { cursor: not-allowed; opacity: .62; }
 .payment-icon {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   display: grid;
   place-items: center;
   color: var(--ivory);
   border-radius: 20px;
 }
-.payment-icon svg { width: 35px; height: 35px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .payment-copy { min-width: 0; }
 .payment-copy span, .payment-copy strong, .payment-copy small { display: block; }
 .payment-kicker { margin-bottom: 4px; color: var(--glacial); font-size: .7rem; font-weight: 600; letter-spacing: .03em; }
@@ -432,14 +430,13 @@ a { color: inherit; }
   text-decoration: none;
 }
 .platform-icon {
-  width: 52px;
-  height: 52px;
+  width: min(100%, 104px);
+  height: 64px;
   display: grid;
   place-items: center;
   color: var(--forest);
-  border-radius: 17px;
+  border-radius: 20px;
 }
-.platform-icon svg { width: 29px; height: 29px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 .platform-label { font-size: clamp(.72rem, 3vw, .86rem); font-weight: 800; line-height: 1.2; }
 .platform-detail { color: var(--sage); font-size: .62rem; line-height: 1.25; }
 .travel-section { padding-top: 34px; }
@@ -452,7 +449,7 @@ a { color: inherit; }
 .travel-card {
   min-height: 72px;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 24px;
+  grid-template-columns: clamp(92px, 28vw, 112px) minmax(0, 1fr) 24px;
   align-items: center;
   gap: 12px;
   padding: 11px 10px;
@@ -462,8 +459,23 @@ a { color: inherit; }
   border-radius: 23px;
   text-decoration: none;
 }
-.travel-icon { width: 48px; height: 48px; display: grid; place-items: center; color: var(--forest); border-radius: 16px; }
-.travel-icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.travel-icon { width: 100%; height: 56px; display: grid; place-items: center; color: var(--forest); border-radius: 18px; }
+.brand-stage { flex: 0 0 auto; overflow: hidden; }
+.brand-mark { display: block; max-width: 100%; }
+.brand-stage--mask .brand-mark {
+  background: currentColor;
+  -webkit-mask: var(--brand-mask-image) center / contain no-repeat;
+  mask: var(--brand-mask-image) center / contain no-repeat;
+}
+.brand-stage--native .brand-mark { object-fit: contain; }
+.whatsapp-icon .brand-mark { width: 42px; height: 42px; }
+.payment-icon .brand-mark { width: 50px; height: 50px; }
+.platform-icon .brand-mark { width: 42px; height: 42px; }
+.platform-icon.brand-stage--wordmark .brand-mark { width: min(92%, 96px); height: 32px; }
+.travel-icon .brand-mark { width: 42px; height: 42px; }
+.travel-icon.brand-stage--wordmark .brand-mark { width: min(92%, 104px); height: 40px; }
+.brand-stage--mercadopago .brand-mark { width: 54px; height: 54px; }
+.brand-stage--googleMaps .brand-mark { width: 42px; height: 42px; }
 .travel-copy { min-width: 0; }
 .travel-copy strong, .travel-copy small { display: block; }
 .travel-copy strong { font-size: .86rem; }

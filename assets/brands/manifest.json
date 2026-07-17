@@ -1,0 +1,69 @@
+{
+  "updated": "2026-07-16",
+  "brands": {
+    "whatsapp": {
+      "file": "whatsapp-glyph.svg",
+      "variant": "Official glyph",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://about.meta.com/brand/resources/whatsapp/whatsapp-brand/",
+      "assetSource": "https://static.whatsapp.net/rsrc.php/y1/r/FJbTMJqMap7.svg",
+      "sha256": "1ab6db0cc2eb55d911f151b0aa339c55b6b225efcceddb8ff2050cab1410e347"
+    },
+    "mercadopago": {
+      "file": "mercado-pago-handshake.svg",
+      "variant": "Official product icon",
+      "treatment": "Native brand colors",
+      "sourcePage": "https://www.mercadopago.com.mx/mp/logo-oficial",
+      "assetSource": "https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/7.4.9/mercadopago/favicon.svg",
+      "sha256": "802c1e56b7d76e051c06e1310ae61257480e40918221d61f06d50e43667afe0a"
+    },
+    "airbnb": {
+      "file": "airbnb-belo.svg",
+      "variant": "Official Belo glyph",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://news.airbnb.com/what-makes-airbnb-airbnb/",
+      "assetSource": "https://news.airbnb.com/wp-content/themes/presser/resources/assets/favicon/favicon.svg",
+      "sha256": "6ba32229831234c4ab58c430316d583a3bac5b15c31c8f85a4175d9b977a19ee"
+    },
+    "booking": {
+      "file": "booking-wordmark.svg",
+      "variant": "Official newsroom wordmark",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://news.booking.com/en/media-library/",
+      "assetSource": "https://content.presspage.com/templates/50/2962/744836/booking_logo--blue.svg?1",
+      "sha256": "98220a088c7193dcb97447e7d9bb6b94d289d121f4eadc418832c5242702a54f"
+    },
+    "instagram": {
+      "file": "instagram-glyph.png",
+      "variant": "Official transparent glyph",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://about.meta.com/brand/resources/instagram/instagram-brand/",
+      "assetSource": "https://static.cdninstagram.com/rsrc.php/v4/yD/r/R0fBIMurK8v.png",
+      "sha256": "4de5110c9b0050b3270d430c5bc8b947d0edae872c362963871b58a2ac827bf0"
+    },
+    "snowForecast": {
+      "file": "snow-forecast-wordmark.png",
+      "variant": "Official black wordmark",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://www.snow-forecast.com/pages/link",
+      "assetSource": "https://www.snow-forecast.com/images/snow-forecast__logo--black@3x.png",
+      "sha256": "af51d15e4d7936338f7f9049c1823227d09525bce5a0d86453de944c083054f8"
+    },
+    "nevados": {
+      "file": "nevados-de-chillan-wordmark.svg",
+      "variant": "Official website wordmark",
+      "treatment": "Cordal Sur monochrome mask",
+      "sourcePage": "https://www.nevadosdechillan.com/",
+      "assetSource": "https://www.nevadosdechillan.com/img/logo.svg",
+      "sha256": "f801ba9f0e0f0c16c68dfe531cea75b783f69de826a994a0e8becb88ffbf16f5"
+    },
+    "googleMaps": {
+      "file": "google-maps-icon.png",
+      "variant": "Official product icon",
+      "treatment": "Native brand colors",
+      "sourcePage": "https://about.google/brand-resource-center/products-and-services/geo-guidelines/",
+      "assetSource": "https://www.gstatic.com/images/branding/product/2x/maps_96in128dp.png",
+      "sha256": "6770847e850f675dea8ff381dee642381dd246f7f08dcab242e8419ada88916c"
+    }
+  }
+}

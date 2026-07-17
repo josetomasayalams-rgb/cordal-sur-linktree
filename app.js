@@ -5,19 +5,63 @@ if (!PREFERENCES) throw new Error("Cordal Sur preferences failed to initialize."
 const t = (key, values) => values ? PREFERENCES.format(key, values) : PREFERENCES.t(key);
 const WHATSAPP_PHONE = "56990137732";
 
+const BRAND_ASSETS = Object.freeze({
+  whatsapp: Object.freeze({
+    src: "assets/brands/whatsapp-glyph.svg",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  mercadopago: Object.freeze({
+    src: "assets/brands/mercado-pago-handshake.svg",
+    type: "glyph",
+    treatment: "native"
+  }),
+  airbnb: Object.freeze({
+    src: "assets/brands/airbnb-belo.svg",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  booking: Object.freeze({
+    src: "assets/brands/booking-wordmark.svg",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  instagram: Object.freeze({
+    src: "assets/brands/instagram-glyph.png",
+    type: "glyph",
+    treatment: "mask"
+  }),
+  snowForecast: Object.freeze({
+    src: "assets/brands/snow-forecast-wordmark.png",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  nevados: Object.freeze({
+    src: "assets/brands/nevados-de-chillan-wordmark.svg",
+    type: "wordmark",
+    treatment: "mask"
+  }),
+  googleMaps: Object.freeze({
+    src: "assets/brands/google-maps-icon.png",
+    type: "glyph",
+    treatment: "native"
+  })
+});
+
 const LINKS = Object.freeze([
   Object.freeze({
     id: "whatsapp",
     group: "primary",
     labelKey: "contact.aria",
-    messageKey: "contact.message"
+    messageKey: "contact.message",
+    brandKey: "whatsapp"
   }),
   Object.freeze({
     id: "mercadopago",
     group: "payment",
     labelKey: "payment.title",
     detailKey: "payment.detail",
-    icon: "card",
+    brandKey: "mercadopago",
     url: "https://link.mercadopago.cl/carhartt"
   }),
   Object.freeze({
@@ -31,7 +75,7 @@ const LINKS = Object.freeze([
     group: "platform",
     labelKey: "link.airbnb.label",
     detailKey: "link.airbnb.detail",
-    icon: "house",
+    brandKey: "airbnb",
     url: "https://www.airbnb.cl/rooms/1729206776074121490"
   }),
   Object.freeze({
@@ -39,7 +83,7 @@ const LINKS = Object.freeze([
     group: "platform",
     labelKey: "link.booking.label",
     detailKey: "link.booking.detail",
-    icon: "calendar",
+    brandKey: "booking",
     url: "https://www.booking.com/hotel/cl/departamento-en-condominio-andes-chillan.html"
   }),
   Object.freeze({
@@ -47,7 +91,7 @@ const LINKS = Object.freeze([
     group: "platform",
     labelKey: "link.instagram.label",
     detailKey: "link.instagram.detail",
-    icon: "camera",
+    brandKey: "instagram",
     url: "https://www.instagram.com/cordal_sur/"
   }),
   Object.freeze({
@@ -55,7 +99,7 @@ const LINKS = Object.freeze([
     group: "travel",
     labelKey: "link.forecast.label",
     detailKey: "link.forecast.detail",
-    icon: "snow",
+    brandKey: "snowForecast",
     url: "https://www.snow-forecast.com/resorts/Chillan/6day/mid"
   }),
   Object.freeze({
@@ -63,7 +107,7 @@ const LINKS = Object.freeze([
     group: "travel",
     labelKey: "link.mountain.label",
     detailKey: "link.mountain.detail",
-    icon: "mountain",
+    brandKey: "nevados",
     url: "https://www.nevadosdechillan.com/reporte-montana"
   }),
   Object.freeze({
@@ -71,7 +115,7 @@ const LINKS = Object.freeze([
     group: "travel",
     labelKey: "link.maps.label",
     detailKey: "link.maps.detail",
-    icon: "pin",
+    brandKey: "googleMaps",
     url: "https://www.google.com/maps/search/?api=1&query=Condominio+Andes+Chill%C3%A1n%2C+Las+Trancas%2C+Chile"
   })
 ]);
@@ -120,17 +164,7 @@ const HERO_PHOTOS = Object.freeze(HERO_SEQUENCE.map(([basename, captionKey]) => 
   return Object.freeze({ ...photo, captionKey });
 }));
 
-Object.assign(window, { LINKS, HERO_PHOTOS, GALLERY_PHOTOS });
-
-const ICONS = Object.freeze({
-  house: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M7 23.5 24 9l17 14.5"/><path d="M11 21v19h26V21M20 40V28h8v12"/></svg>',
-  calendar: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="10" width="34" height="31" rx="5"/><path d="M15 6v8M33 6v8M7 19h34M16 30l5 5 11-11"/></svg>',
-  card: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="10" width="38" height="28" rx="6"/><path d="M5 19h38M12 30h9M35 29.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 1 1 0-7Z"/></svg>',
-  camera: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="7" y="7" width="34" height="34" rx="10"/><circle cx="24" cy="24" r="8"/><circle cx="34.5" cy="13.5" r="1.5" class="icon-fill"/></svg>',
-  snow: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 5v38M7.5 14.5l33 19M7.5 33.5l33-19M18 9l6 6 6-6M18 39l6-6 6 6M8 22l8 2-2 8M40 26l-8-2 2-8"/></svg>',
-  mountain: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="m4 39 13-23 6 10 6-17 15 30H4Z"/><path d="m13 23 4 4 4-4M25 19l4 5 4-5"/></svg>',
-  pin: '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M38 20c0 11-14 23-14 23S10 31 10 20a14 14 0 1 1 28 0Z"/><circle cx="24" cy="20" r="5"/></svg>'
-});
+Object.assign(window, { LINKS, BRAND_ASSETS, HERO_PHOTOS, GALLERY_PHOTOS });
 
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
@@ -161,6 +195,42 @@ function photoAlt(photo) {
   return t("gallery.photo.alt", { category: t(photo.categoryKey), caption: t(photo.captionKey) });
 }
 
+function populateBrandStage(stage, brandKey) {
+  const asset = BRAND_ASSETS[brandKey];
+  if (!stage || !asset) return false;
+
+  stage.classList.add(
+    "brand-stage",
+    `brand-stage--${asset.type}`,
+    `brand-stage--${asset.treatment}`,
+    `brand-stage--${brandKey}`
+  );
+  stage.dataset.brand = brandKey;
+  stage.setAttribute("aria-hidden", "true");
+
+  if (asset.treatment === "native") {
+    const image = document.createElement("img");
+    image.className = "brand-mark";
+    image.src = asset.src;
+    image.alt = "";
+    image.decoding = "async";
+    stage.replaceChildren(image);
+    return true;
+  }
+
+  const mark = document.createElement("span");
+  mark.className = "brand-mark";
+  mark.style.setProperty("--brand-mask-image", `url("${asset.src}")`);
+  stage.replaceChildren(mark);
+  return true;
+}
+
+function createBrandStage(brandKey, type) {
+  const stage = document.createElement("span");
+  stage.className = `${type}-icon`;
+  return populateBrandStage(stage, brandKey) ? stage : null;
+}
+
 function renderLinks(container, links, type) {
   if (!container) return;
   const fragment = document.createDocumentFragment();
@@ -174,10 +244,8 @@ function renderLinks(container, links, type) {
     anchor.href = href;
     anchor.setAttribute("aria-label", `${labelText}. ${detailText}`);
 
-    const icon = document.createElement("span");
-    icon.className = `${type}-icon`;
-    icon.innerHTML = ICONS[link.icon];
-    anchor.append(icon);
+    const brandStage = createBrandStage(link.brandKey, type);
+    if (brandStage) anchor.append(brandStage);
 
     if (type === "platform") {
       const label = document.createElement("strong");
@@ -209,6 +277,8 @@ function renderLinks(container, links, type) {
 function initializeLinks() {
   const whatsapp = LINKS.find(({ id }) => id === "whatsapp");
   const whatsappAnchor = document.querySelector("#whatsapp-link");
+  const whatsappBrand = document.querySelector("#whatsapp-brand");
+  if (whatsappBrand) populateBrandStage(whatsappBrand, whatsapp.brandKey);
   const render = () => {
     if (whatsappAnchor) {
       whatsappAnchor.href = linkHref(whatsapp) || "#";
@@ -242,7 +312,7 @@ function initializePayment() {
     return;
   }
 
-  icon.innerHTML = ICONS[payment.icon];
+  populateBrandStage(icon, payment.brandKey);
   continueLink.href = paymentHref;
   const syncLanguage = () => {
     receiptLink.href = linkHref(receipt) || "#";
