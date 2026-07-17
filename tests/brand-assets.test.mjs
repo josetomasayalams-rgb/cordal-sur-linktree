@@ -60,6 +60,23 @@ test("removes generic destination pictograms and renders decorative brand marks"
   assert.doesNotMatch(`${app}\n${html}\n${styles}\n${glass}`, /(?:src|url\()["']?https?:\/\/(?:static|content|www|http2|news)/i);
 });
 
+test("renders the reservation tray as accessible logo-only links", () => {
+  assert.doesNotMatch(app, /platform-label|platform-detail/);
+  assert.match(app, /anchor\.setAttribute\("aria-label", `\$\{labelText\}\. \$\{detailText\}`\)/);
+  assert.match(app, /if \(type !== "platform"\)/);
+  assert.match(styles, /\.platform-card \{[\s\S]*?min-height: 104px/);
+  assert.match(styles, /\.platform-icon \.brand-mark \{ width: 52px; height: 52px; \}/);
+});
+
+test("switches Cordal brand surfaces between light and dark treatments", () => {
+  assert.match(glass, /\.brand-stage--mask \{[\s\S]*?color: var\(--forest\);[\s\S]*?background: linear-gradient\(145deg, #fff, var\(--ivory\)\)/);
+  assert.match(glass, /\.brand-plate\.glass-surface \{[\s\S]*?--glass-fill: #fff/);
+  assert.match(glass, /html\[data-theme="dark"\] \.brand-stage--mask \{[\s\S]*?color: var\(--ivory\);[\s\S]*?#245044, var\(--forest\)/);
+  assert.match(glass, /html\[data-theme="dark"\] \.brand-plate\.glass-surface \{[\s\S]*?--glass-fill: rgba\(21, 59, 51, \.94\)/);
+  assert.match(styles, /html\[data-theme="dark"\] \.brand-symbol \{ background: var\(--ivory\); \}/);
+  assert.match(styles, /html\[data-theme="dark"\] \.brand-name \{ color: var\(--ivory\); \}/);
+});
+
 test("documents Cordal treatments while preserving official brand geometry", () => {
   assert.equal(manifest.brands.mercadopago.treatment, "Cordal Sur light-green background and dark-green border; official geometry retained");
   assert.equal(manifest.brands.googleMaps.treatment, "Native brand colors");
