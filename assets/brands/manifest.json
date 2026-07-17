@@ -11,11 +11,13 @@
     },
     "mercadopago": {
       "file": "mercado-pago-handshake.svg",
-      "variant": "Official product icon",
-      "treatment": "Cordal Sur light-green background and dark-green border; official geometry retained",
+      "lightFile": "mercado-pago-handshake-light.svg",
+      "variant": "Official product icon with Cordal Sur theme variants",
+      "treatment": "Light: white background and dark-green linework; dark: light-green background and dark-green border; official geometry retained",
       "sourcePage": "https://www.mercadopago.com.mx/mp/logo-oficial",
       "assetSource": "https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/7.4.9/mercadopago/favicon.svg",
-      "sha256": "5e5691b349110bf91adc184041b60665c16a23bd61374168a0ce872a207173f2"
+      "sha256": "5e5691b349110bf91adc184041b60665c16a23bd61374168a0ce872a207173f2",
+      "lightSha256": "fe6f73785e157903c980d6419162fa045f59b3ddf9bdeaa36b79145be919364c"
     },
     "airbnb": {
       "file": "airbnb-belo.svg",

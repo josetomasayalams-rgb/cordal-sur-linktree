@@ -341,7 +341,8 @@ html[data-theme="dark"] .payment-dialog-close {
   .glass-surface::before, .platform-card::before, .travel-card::before { display: none; }
   .brand-stage--mask .brand-mark { background: CanvasText; }
   .brand-stage--native .brand-mark,
-  .brand-stage--adapted .brand-mark { forced-color-adjust: none; }
+  .brand-stage--adapted .brand-mark,
+  .brand-stage--themed .brand-mark { forced-color-adjust: none; }
   .brand-symbol { background: CanvasText !important; }
   .brand-name { color: CanvasText !important; }
 }
