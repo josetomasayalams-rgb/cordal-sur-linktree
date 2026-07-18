@@ -34,21 +34,36 @@ test("uses the approved sanitized HTTPS availability endpoint", () => {
   const url = new URL(api.CONFIG.endpoint);
   assert.equal(url.protocol, "https:");
   assert.equal(url.hostname, "uimqusoylxpyljbfqumm.supabase.co");
-  assert.equal(url.pathname, "/functions/v1/calendar-ical/availability");
+  assert.equal(url.pathname, "/functions/v1/calendar-ical/public-availability");
   assert.equal(api.safeEndpoint(), api.CONFIG.endpoint);
   assert.doesNotMatch(source, /AIRBNB_ICAL_URL|BOOKING_ICAL_URL|SERVICE_ROLE_KEY|external_calendar_events|\.ics\b/i);
 });
 
-test("prices Sunday through Thursday at CLP 250,000 and Friday/Saturday at CLP 280,000", () => {
+test("prices Sunday through Thursday at CLP 260,000 and Friday/Saturday at CLP 280,000", () => {
   const { api } = loadAvailability();
-  assert.equal(api.nightlyRate("2026-07-16"), 250000); // Thursday
+  assert.equal(api.nightlyRate("2026-07-16"), 260000); // Thursday
   assert.equal(api.nightlyRate("2026-07-17"), 280000); // Friday
   assert.equal(api.nightlyRate("2026-07-18"), 280000); // Saturday
-  assert.equal(api.nightlyRate("2026-07-19"), 250000); // Sunday
+  assert.equal(api.nightlyRate("2026-07-19"), 260000); // Sunday
   const quote = api.quoteRange("2026-07-16", "2026-07-19");
   assert.equal(quote.nights, 3);
-  assert.equal(quote.totalClp, 810000);
+  assert.equal(quote.totalClp, 820000);
   assert.deepEqual(Array.from(quote.lines, (line) => line.kind), ["weekday", "weekend", "weekend"]);
+});
+
+test("keeps the full September season and stops before October", () => {
+  const { api } = loadAvailability();
+  assert.equal(api.CONFIG.bookingEndExclusive, "2026-10-01");
+  assert.equal(api.nightlyRate("2026-09-30"), 260000);
+  assert.deepEqual({ ...api.clampBookableRange({
+    from: "2026-07-18",
+    to: "2027-07-18",
+    endExclusive: true,
+  }) }, {
+    from: "2026-07-18",
+    to: "2026-10-01",
+    endExclusive: true,
+  });
 });
 
 test("keeps exclusive checkout semantics and blocks only occupied nights", () => {
@@ -77,20 +92,23 @@ test("accepts only the minimal versioned contract and rejects source details", (
   assert.equal(api.validatePayload({ ...payload, status: "free" }), null);
 });
 
-test("keeps prices hidden by default and connects the accessible calendar controls", () => {
+test("unlocks nightly prices only after selecting a date and keeps accessible calendar controls", () => {
   for (const id of [
     "availability-status",
     "availability-refresh",
     "availability-previous",
     "availability-next",
     "availability-months",
-    "availability-show-prices",
     "availability-selection",
+    "availability-selection-title",
+    "availability-quote-label",
     "availability-consult",
     "availability-live",
   ]) assert.ok(html.includes(`id="${id}"`), `Missing #${id}`);
-  assert.match(html, /id="availability-show-prices" type="checkbox" role="switch">/);
-  assert.doesNotMatch(html, /id="availability-show-prices"[^>]*\bchecked\b/);
+  assert.match(html, /id="availability-selection" hidden/);
+  assert.match(source, /elements\.selection\.hidden = !selected/);
+  assert.match(source, /complete \? state\.departure : shiftDays\(state\.arrival, 1\)/);
+  assert.doesNotMatch(html, /availability-show-prices|Mostrar precios/);
   for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"]) {
     assert.ok(source.includes(`"${key}"`), `Missing keyboard behavior for ${key}`);
   }

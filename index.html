@@ -145,18 +145,13 @@
           <button class="availability-nav glass-interactive" id="availability-previous" type="button" data-i18n-aria="availability.previous" aria-label="Mes anterior">←</button>
           <p class="availability-view-label" id="availability-view-label" aria-hidden="true"></p>
           <button class="availability-nav glass-interactive" id="availability-next" type="button" data-i18n-aria="availability.next" aria-label="Mes siguiente">→</button>
-          <label class="availability-price-toggle" for="availability-show-prices">
-            <input id="availability-show-prices" type="checkbox" role="switch">
-            <span class="availability-switch" aria-hidden="true"></span>
-            <span data-i18n="availability.showPrices">Mostrar precios</span>
-          </label>
         </div>
 
         <div class="availability-months" id="availability-months" data-i18n-aria="availability.calendar.aria" aria-label="Calendario público de disponibilidad" aria-busy="true"></div>
 
         <div class="availability-selection" id="availability-selection" hidden>
           <div class="availability-selection-heading">
-            <p><span class="availability-check" aria-hidden="true">✓</span> <strong data-i18n="availability.confirmed">Fechas disponibles</strong></p>
+            <p><span class="availability-check" aria-hidden="true">✓</span> <strong id="availability-selection-title" data-i18n="availability.dateSelected">Noche seleccionada</strong></p>
             <button id="availability-clear" type="button" data-i18n="availability.clear">Borrar selección</button>
           </div>
           <dl class="availability-dates">
@@ -166,9 +161,9 @@
           </dl>
           <div class="availability-quote" id="availability-quote" hidden>
             <ol id="availability-price-breakdown"></ol>
-            <p><span data-i18n="availability.estimate">Subtotal estimado</span> <strong id="availability-subtotal">—</strong></p>
+            <p><span id="availability-quote-label" data-i18n="availability.nightlyPrice">Precio por noche</span> <strong id="availability-subtotal">—</strong></p>
           </div>
-          <a class="availability-consult glass-surface glass-tinted glass-interactive" id="availability-consult" target="_blank" rel="noopener noreferrer">
+          <a class="availability-consult glass-surface glass-tinted glass-interactive" id="availability-consult" target="_blank" rel="noopener noreferrer" hidden>
             <span data-i18n="availability.consult">Consultar estas fechas por WhatsApp</span>
             <span aria-hidden="true">↗</span>
           </a>
