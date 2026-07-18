@@ -192,6 +192,7 @@
       departure: root.querySelector("#availability-departure"),
       nightCount: root.querySelector("#availability-night-count"),
       clear: root.querySelector("#availability-clear"),
+      revealPrice: root.querySelector("#availability-reveal-price"),
       quote: root.querySelector("#availability-quote"),
       breakdown: root.querySelector("#availability-price-breakdown"),
       quoteLabel: root.querySelector("#availability-quote-label"),
@@ -208,6 +209,7 @@
       viewMonth: monthStart(today),
       arrival: null,
       departure: null,
+      pricesRevealed: false,
       focusDate: today,
       loading: false,
     };
@@ -384,7 +386,18 @@
       elements.arrival.textContent = formatDate(state.arrival);
       elements.departure.textContent = complete ? formatDate(state.departure) : t("availability.chooseDeparture");
       elements.nightCount.textContent = complete ? nightCountLabel(quote.nights) : "—";
-      elements.quote.hidden = false;
+      elements.revealPrice.hidden = state.pricesRevealed;
+      elements.revealPrice.setAttribute("aria-expanded", String(state.pricesRevealed));
+      elements.quote.hidden = !state.pricesRevealed;
+      elements.consult.hidden = !complete || !state.pricesRevealed;
+
+      if (!state.pricesRevealed) {
+        elements.breakdown.replaceChildren();
+        elements.subtotal.textContent = "—";
+        elements.consult.removeAttribute("href");
+        return;
+      }
+
       elements.breakdown.replaceChildren(...quote.lines.map((line) => {
         const item = document.createElement("li");
         const copy = document.createElement("span");
@@ -396,7 +409,6 @@
       }));
       elements.quoteLabel.textContent = t(complete ? "availability.estimate" : "availability.nightlyPrice");
       elements.subtotal.textContent = formatMoney(quote.totalClp);
-      elements.consult.hidden = !complete;
       if (complete) elements.consult.href = whatsappHref(state.arrival, state.departure, true);
     }
 
@@ -409,6 +421,7 @@
     function resetSelection(announceReset = true) {
       state.arrival = null;
       state.departure = null;
+      state.pricesRevealed = false;
       if (announceReset) announce("availability.selectArrival");
       render();
     }
@@ -419,6 +432,7 @@
         if (isBlocked(date, blockedRanges())) return;
         state.arrival = date;
         state.departure = null;
+        state.pricesRevealed = false;
         state.focusDate = date;
         announce("availability.selectDeparture");
         render();
@@ -511,6 +525,12 @@
     });
     elements.refresh.addEventListener("click", load);
     elements.clear.addEventListener("click", () => resetSelection());
+    elements.revealPrice.addEventListener("click", () => {
+      if (!state.arrival || state.pricesRevealed) return;
+      state.pricesRevealed = true;
+      renderSelection();
+      announce("availability.pricesRevealed");
+    });
     window.addEventListener("online", load);
     window.addEventListener("offline", () => {
       state.mode = state.payload ? "offline" : "unavailable";

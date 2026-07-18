@@ -159,7 +159,14 @@
             <div><dt data-i18n="availability.departure">Salida</dt><dd id="availability-departure">—</dd></div>
             <div><dt data-i18n="availability.nights.label">Noches</dt><dd id="availability-night-count">—</dd></div>
           </dl>
-          <div class="availability-quote" id="availability-quote" hidden>
+          <button class="availability-reveal-price" id="availability-reveal-price" type="button" aria-controls="availability-quote" aria-expanded="false">
+            <span>
+              <strong data-i18n="availability.revealPrices">Revelar precios</strong>
+              <small data-i18n="availability.revealPrices.detail">Muestra el valor de la noche seleccionada o el total de tu estadía.</small>
+            </span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <div class="availability-quote" id="availability-quote" role="region" aria-labelledby="availability-quote-label" aria-live="polite" hidden>
             <ol id="availability-price-breakdown"></ol>
             <p><span id="availability-quote-label" data-i18n="availability.nightlyPrice">Precio por noche</span> <strong id="availability-subtotal">—</strong></p>
           </div>
