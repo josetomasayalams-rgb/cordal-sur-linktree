@@ -5,6 +5,7 @@ import vm from "node:vm";
 
 const preferencesSource = fs.readFileSync(new URL("../preferences.js", import.meta.url), "utf8");
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
+const availabilitySource = fs.readFileSync(new URL("../availability.js", import.meta.url), "utf8");
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const styles = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 const glass = fs.readFileSync(new URL("../glass.css", import.meta.url), "utf8");
@@ -93,6 +94,7 @@ test("connects every static and programmatic translation key", () => {
   const appKeys = [
     ...appSource.matchAll(/\bt\("([^"]+)"/g),
     ...appSource.matchAll(/(?:labelKey|detailKey|messageKey|titleKey|captionKey): "([^"]+)"/g),
+    ...availabilitySource.matchAll(/\bt\("([^"]+)"/g),
   ].map((match) => match[1]);
   for (const key of [...htmlKeys, ...appKeys]) assert.ok(keys.has(key), `Missing translation key: ${key}`);
   assert.match(html, /data-language-option="es" aria-pressed="true"/);
@@ -115,9 +117,10 @@ test("applies the saved Linktree theme before styles load", () => {
 });
 
 test("keeps the Linktree compatible with direct file opening", () => {
-  assert.doesNotMatch(`${preferencesSource}\n${appSource}`, /\bfetch\s*\(|\bimport\s*\(/);
+  assert.doesNotMatch(`${preferencesSource}\n${availabilitySource}\n${appSource}`, /\bimport\s*\(/);
   assert.doesNotMatch(html, /<script[^>]+type="module"/);
-  for (const resource of ["preferences.js", "app.js", "glass.js", "styles.css", "glass.css"]) {
+  assert.match(availabilitySource, /fetch\(endpoint, \{ signal: controller\.signal, cache: "no-store"/);
+  for (const resource of ["preferences.js", "availability.js", "app.js", "glass.js", "styles.css", "glass.css"]) {
     assert.ok(fs.existsSync(new URL(`../${resource}`, import.meta.url)), `Missing local resource: ${resource}`);
   }
 });
