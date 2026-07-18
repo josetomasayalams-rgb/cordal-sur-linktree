@@ -6,6 +6,7 @@ import vm from "node:vm";
 const source = fs.readFileSync(new URL("../availability.js", import.meta.url), "utf8");
 const preferencesSource = fs.readFileSync(new URL("../preferences.js", import.meta.url), "utf8");
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const styles = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 
 function loadAvailability() {
   const values = new Map();
@@ -92,7 +93,7 @@ test("accepts only the minimal versioned contract and rejects source details", (
   assert.equal(api.validatePayload({ ...payload, status: "free" }), null);
 });
 
-test("unlocks nightly prices only after selecting a date and keeps accessible calendar controls", () => {
+test("opens the selected-date card first and reveals prices only from its primary button", () => {
   for (const id of [
     "availability-status",
     "availability-refresh",
@@ -101,14 +102,28 @@ test("unlocks nightly prices only after selecting a date and keeps accessible ca
     "availability-months",
     "availability-selection",
     "availability-selection-title",
+    "availability-reveal-price",
     "availability-quote-label",
     "availability-consult",
     "availability-live",
   ]) assert.ok(html.includes(`id="${id}"`), `Missing #${id}`);
   assert.match(html, /id="availability-selection" hidden/);
+  assert.match(html, /id="availability-reveal-price"[^>]*aria-controls="availability-quote"[^>]*aria-expanded="false"/);
+  assert.match(html, /id="availability-quote"[^>]*hidden/);
+  assert.match(styles, /\[hidden\] \{ display: none !important; \}/);
   assert.match(source, /elements\.selection\.hidden = !selected/);
+  assert.match(source, /pricesRevealed: false/);
+  assert.match(source, /elements\.quote\.hidden = !state\.pricesRevealed/);
+  assert.match(source, /elements\.revealPrice\.hidden = state\.pricesRevealed/);
+  assert.match(source, /elements\.consult\.hidden = !complete \|\| !state\.pricesRevealed/);
+  assert.match(source, /state\.pricesRevealed = true;\s*renderSelection\(\);/);
+  assert.match(source, /state\.pricesRevealed = false;/);
+  assert.match(source, /if \(!state\.pricesRevealed\) \{[\s\S]*elements\.subtotal\.textContent = "—"/);
   assert.match(source, /complete \? state\.departure : shiftDays\(state\.arrival, 1\)/);
   assert.doesNotMatch(html, /availability-show-prices|Mostrar precios/);
+  for (const key of ["availability.revealPrices", "availability.revealPrices.detail", "availability.pricesRevealed"]) {
+    assert.ok(preferencesSource.includes(`"${key}"`), `Missing translation ${key}`);
+  }
   for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"]) {
     assert.ok(source.includes(`"${key}"`), `Missing keyboard behavior for ${key}`);
   }
