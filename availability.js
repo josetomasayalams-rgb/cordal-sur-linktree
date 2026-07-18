@@ -5,12 +5,13 @@
   if (!PREFERENCES) throw new Error("Cordal Sur preferences failed to initialize.");
 
   const CONFIG = Object.freeze({
-    endpoint: "https://uimqusoylxpyljbfqumm.supabase.co/functions/v1/calendar-ical/availability",
+    endpoint: "https://uimqusoylxpyljbfqumm.supabase.co/functions/v1/calendar-ical/public-availability",
     allowedHost: "uimqusoylxpyljbfqumm.supabase.co",
     whatsappPhone: "56990137732",
     timezone: "America/Santiago",
-    weekdayRateClp: 250000,
+    weekdayRateClp: 260000,
     weekendRateClp: 280000,
+    bookingEndExclusive: "2026-10-01",
     monthsAhead: 12,
     timeoutMs: 8000,
   });
@@ -53,6 +54,13 @@
   function monthStart(value) {
     const date = parseIsoDate(value);
     return date ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-01` : value;
+  }
+
+  function clampBookableRange(range) {
+    return Object.freeze({
+      ...range,
+      to: range.to < CONFIG.bookingEndExclusive ? range.to : CONFIG.bookingEndExclusive,
+    });
   }
 
   function todayInSantiago(now = new Date()) {
@@ -178,21 +186,22 @@
       next: root.querySelector("#availability-next"),
       viewLabel: root.querySelector("#availability-view-label"),
       months: root.querySelector("#availability-months"),
-      priceToggle: root.querySelector("#availability-show-prices"),
       selection: root.querySelector("#availability-selection"),
+      selectionTitle: root.querySelector("#availability-selection-title"),
       arrival: root.querySelector("#availability-arrival"),
       departure: root.querySelector("#availability-departure"),
       nightCount: root.querySelector("#availability-night-count"),
       clear: root.querySelector("#availability-clear"),
       quote: root.querySelector("#availability-quote"),
       breakdown: root.querySelector("#availability-price-breakdown"),
+      quoteLabel: root.querySelector("#availability-quote-label"),
       subtotal: root.querySelector("#availability-subtotal"),
       consult: root.querySelector("#availability-consult"),
       live: root.querySelector("#availability-live"),
     };
 
     const today = todayInSantiago();
-    const fallbackRange = { from: today, to: shiftMonths(today, CONFIG.monthsAhead), endExclusive: true };
+    const fallbackRange = clampBookableRange({ from: today, to: shiftMonths(today, CONFIG.monthsAhead), endExclusive: true });
     const state = {
       payload: null,
       mode: "loading",
@@ -204,7 +213,7 @@
     };
 
     const visibleMonthCount = () => window.matchMedia("(min-width: 640px)").matches ? 2 : 1;
-    const activeRange = () => state.payload?.range || fallbackRange;
+    const activeRange = () => state.payload ? clampBookableRange(state.payload.range) : fallbackRange;
     const blockedRanges = () => state.payload?.blockedRanges || [];
     const availableForSelection = () => state.payload && state.mode !== "unavailable";
     const lastMonth = () => monthStart(shiftDays(activeRange().to, -1));
@@ -367,13 +376,15 @@
 
     function renderSelection() {
       const complete = Boolean(state.arrival && state.departure);
-      elements.selection.hidden = !complete;
-      if (!complete) return;
-      const quote = quoteRange(state.arrival, state.departure);
+      const selected = Boolean(state.arrival);
+      elements.selection.hidden = !selected;
+      if (!selected) return;
+      const quote = quoteRange(state.arrival, complete ? state.departure : shiftDays(state.arrival, 1));
+      elements.selectionTitle.textContent = t(complete ? "availability.confirmed" : "availability.dateSelected");
       elements.arrival.textContent = formatDate(state.arrival);
-      elements.departure.textContent = formatDate(state.departure);
-      elements.nightCount.textContent = nightCountLabel(quote.nights);
-      elements.quote.hidden = !elements.priceToggle.checked;
+      elements.departure.textContent = complete ? formatDate(state.departure) : t("availability.chooseDeparture");
+      elements.nightCount.textContent = complete ? nightCountLabel(quote.nights) : "—";
+      elements.quote.hidden = false;
       elements.breakdown.replaceChildren(...quote.lines.map((line) => {
         const item = document.createElement("li");
         const copy = document.createElement("span");
@@ -383,8 +394,10 @@
         item.append(copy, amount);
         return item;
       }));
+      elements.quoteLabel.textContent = t(complete ? "availability.estimate" : "availability.nightlyPrice");
       elements.subtotal.textContent = formatMoney(quote.totalClp);
-      elements.consult.href = whatsappHref(state.arrival, state.departure, elements.priceToggle.checked);
+      elements.consult.hidden = !complete;
+      if (complete) elements.consult.href = whatsappHref(state.arrival, state.departure, true);
     }
 
     function render() {
@@ -462,7 +475,7 @@
         const payload = await requestAvailability();
         state.payload = payload;
         state.mode = payload.status;
-        if (state.viewMonth < monthStart(payload.range.from)) state.viewMonth = monthStart(payload.range.from);
+        if (state.viewMonth < monthStart(activeRange().from)) state.viewMonth = monthStart(activeRange().from);
         if (state.viewMonth > maxViewMonth()) state.viewMonth = maxViewMonth();
         if (payload.status === "unavailable") resetSelection(false);
         announce(payload.status === "unavailable" ? "availability.unavailable" : payload.status === "stale" ? "availability.stale" : "availability.selectArrival");
@@ -498,10 +511,6 @@
     });
     elements.refresh.addEventListener("click", load);
     elements.clear.addEventListener("click", () => resetSelection());
-    elements.priceToggle.addEventListener("change", () => {
-      renderSelection();
-      if (state.arrival && state.departure) announce("availability.estimate");
-    });
     window.addEventListener("online", load);
     window.addEventListener("offline", () => {
       state.mode = state.payload ? "offline" : "unavailable";
@@ -514,7 +523,6 @@
       render();
     });
 
-    elements.priceToggle.checked = false;
     render();
     void load();
   }
@@ -529,6 +537,7 @@
     rangeHasBlockedNight,
     nightlyRate,
     quoteRange,
+    clampBookableRange,
     validatePayload,
     safeEndpoint,
     buildWhatsappMessage,

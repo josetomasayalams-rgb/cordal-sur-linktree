@@ -426,28 +426,6 @@ a { color: inherit; }
   margin-top: 14px;
 }
 .availability-view-label { margin: 0; overflow: hidden; font-size: .76rem; font-weight: 800; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.availability-price-toggle {
-  min-height: 48px;
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 8px 12px;
-  color: var(--forest);
-  background: var(--forest-08);
-  border: 1px solid var(--forest-12);
-  border-radius: 15px;
-  font-size: .74rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-.availability-price-toggle input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
-.availability-switch { width: 40px; height: 24px; position: relative; flex: 0 0 40px; background: var(--forest-20); border: 1px solid var(--forest-20); border-radius: 999px; transition: background-color .18s ease; }
-.availability-switch::after { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; content: ""; background: var(--ivory); border-radius: 50%; box-shadow: 0 2px 5px rgba(21,59,51,.22); transition: transform .18s ease; }
-.availability-price-toggle input:checked + .availability-switch { background: var(--forest); }
-.availability-price-toggle input:checked + .availability-switch::after { transform: translateX(16px); }
-.availability-price-toggle:has(input:focus-visible) { outline: 3px solid var(--forest); outline-offset: 3px; box-shadow: 0 0 0 6px var(--gold); }
 .availability-months { display: grid; gap: 18px; margin-top: 17px; }
 .availability-month h3 { margin: 0 0 9px; font-size: .91rem; text-align: center; text-transform: capitalize; }
 .availability-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
@@ -829,8 +807,6 @@ html[data-theme="dark"] :focus-visible { outline-color: #f5f7f2; box-shadow: 0 0
   .gallery-group-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 }
 @media (min-width: 640px) {
-  .availability-toolbar { grid-template-columns: 48px minmax(0, 1fr) 48px auto; }
-  .availability-price-toggle { grid-column: auto; min-width: 142px; }
   .availability-months { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
   .availability-day { min-height: 54px; }
 }
