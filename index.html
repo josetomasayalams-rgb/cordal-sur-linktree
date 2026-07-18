@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="glass.css">
   <script src="preferences.js" defer></script>
+  <script src="availability.js" defer></script>
   <script src="app.js" defer></script>
   <script src="glass.js" defer></script>
 </head>
@@ -120,6 +121,62 @@
         </span>
         <span class="whatsapp-arrow" aria-hidden="true">→</span>
       </a>
+    </section>
+
+    <section class="availability-section" aria-labelledby="availability-title">
+      <div class="availability-card glass-surface glass-regular">
+        <header class="availability-header">
+          <div>
+            <p class="eyebrow" data-i18n="availability.eyebrow">Disponibilidad</p>
+            <h2 id="availability-title" data-i18n="availability.title">Encuentra tus fechas</h2>
+            <p data-i18n="availability.description">Consulta la disponibilidad consolidada de nuestros calendarios de reserva.</p>
+          </div>
+          <button class="availability-refresh glass-interactive" id="availability-refresh" type="button" data-i18n-aria="availability.refresh" aria-label="Actualizar disponibilidad">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <div class="availability-status" id="availability-status" role="status">
+          <span class="availability-status-dot" aria-hidden="true"></span>
+          <span data-i18n="availability.loading">Consultando disponibilidad…</span>
+        </div>
+
+        <div class="availability-toolbar">
+          <button class="availability-nav glass-interactive" id="availability-previous" type="button" data-i18n-aria="availability.previous" aria-label="Mes anterior">←</button>
+          <p class="availability-view-label" id="availability-view-label" aria-hidden="true"></p>
+          <button class="availability-nav glass-interactive" id="availability-next" type="button" data-i18n-aria="availability.next" aria-label="Mes siguiente">→</button>
+          <label class="availability-price-toggle" for="availability-show-prices">
+            <input id="availability-show-prices" type="checkbox" role="switch">
+            <span class="availability-switch" aria-hidden="true"></span>
+            <span data-i18n="availability.showPrices">Mostrar precios</span>
+          </label>
+        </div>
+
+        <div class="availability-months" id="availability-months" data-i18n-aria="availability.calendar.aria" aria-label="Calendario público de disponibilidad" aria-busy="true"></div>
+
+        <div class="availability-selection" id="availability-selection" hidden>
+          <div class="availability-selection-heading">
+            <p><span class="availability-check" aria-hidden="true">✓</span> <strong data-i18n="availability.confirmed">Fechas disponibles</strong></p>
+            <button id="availability-clear" type="button" data-i18n="availability.clear">Borrar selección</button>
+          </div>
+          <dl class="availability-dates">
+            <div><dt data-i18n="availability.arrival">Llegada</dt><dd id="availability-arrival">—</dd></div>
+            <div><dt data-i18n="availability.departure">Salida</dt><dd id="availability-departure">—</dd></div>
+            <div><dt data-i18n="availability.nights.label">Noches</dt><dd id="availability-night-count">—</dd></div>
+          </dl>
+          <div class="availability-quote" id="availability-quote" hidden>
+            <ol id="availability-price-breakdown"></ol>
+            <p><span data-i18n="availability.estimate">Subtotal estimado</span> <strong id="availability-subtotal">—</strong></p>
+          </div>
+          <a class="availability-consult glass-surface glass-tinted glass-interactive" id="availability-consult" target="_blank" rel="noopener noreferrer">
+            <span data-i18n="availability.consult">Consultar estas fechas por WhatsApp</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <p class="availability-disclaimer" data-i18n="availability.disclaimer">Esta consulta no constituye una reserva. La disponibilidad y el valor final deben confirmarse con Cordal Sur.</p>
+        <p class="visually-hidden" id="availability-live" aria-live="polite"></p>
+      </div>
     </section>
 
     <section class="payment-section" aria-labelledby="payment-title">
