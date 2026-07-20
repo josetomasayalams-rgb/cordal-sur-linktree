@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://josetomasayalams-rgb.github.io/cordal-sur-linktree/sitemap.xml

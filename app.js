@@ -123,42 +123,40 @@ const LINKS = Object.freeze([
 ]);
 
 const PHOTO_GROUPS = Object.freeze([
-  Object.freeze({ id: "principal", titleKey: "photo.principal.title", slug: "01-dormitorio-principal", files: [1, 3], count: 2 }),
-  Object.freeze({ id: "futon", titleKey: "photo.futon.title", slug: "02-dormitorio-futon", count: 10 }),
-  Object.freeze({ id: "literas", titleKey: "photo.literas.title", slug: "03-dormitorio-literas", count: 10 }),
-  Object.freeze({ id: "banos", titleKey: "photo.banos.title", slug: "04-banos", count: 5 }),
-  Object.freeze({ id: "cocina", titleKey: "photo.cocina.title", slug: "05-cocina", count: 2 }),
-  Object.freeze({ id: "sala", titleKey: "photo.sala.title", slug: "06-sala", count: 2 }),
-  Object.freeze({ id: "comedor", titleKey: "photo.comedor.title", slug: "07-comedor", count: 2 }),
-  Object.freeze({ id: "balcon", titleKey: "photo.balcon.title", slug: "08-balcon", count: 1 }),
-  Object.freeze({ id: "exterior", titleKey: "photo.exterior.title", slug: "09-exterior", count: 1 }),
-  Object.freeze({ id: "piscina", titleKey: "photo.piscina.title", slug: "10-piscina", count: 1 }),
-  Object.freeze({ id: "entorno", titleKey: "photo.entorno.title", slug: "11-entorno", count: 2 })
+  Object.freeze({ id: "sala", titleKey: "gallery.sala", captionKey: "gallery.sala.caption", slug: "01-sala", count: 2 }),
+  Object.freeze({ id: "cocina", titleKey: "gallery.cocina", captionKey: "gallery.cocina.caption", slug: "02-cocina-completa", count: 4 }),
+  Object.freeze({ id: "comedor", titleKey: "gallery.comedor", captionKey: "gallery.comedor.caption", slug: "03-comedor", count: 2 }),
+  Object.freeze({ id: "habitacion1", titleKey: "gallery.habitacion1", captionKey: "gallery.habitacion1.caption", slug: "04-habitacion-1", count: 7 }),
+  Object.freeze({ id: "habitacion2", titleKey: "gallery.habitacion2", captionKey: "gallery.habitacion2.caption", slug: "05-habitacion-2", count: 15 }),
+  Object.freeze({ id: "habitacion3", titleKey: "gallery.habitacion3", captionKey: "gallery.habitacion3.caption", slug: "06-habitacion-3", count: 5 }),
+  Object.freeze({ id: "bano1", titleKey: "gallery.bano1", captionKey: "gallery.bano1.caption", slug: "07-bano-completo-1", count: 2 }),
+  Object.freeze({ id: "bano2", titleKey: "gallery.bano2", captionKey: "gallery.bano2.caption", slug: "08-bano-completo-2", count: 2 }),
+  Object.freeze({ id: "balcon", titleKey: "gallery.balcon", captionKey: "gallery.balcon.caption", slug: "09-balcon", count: 1 }),
+  Object.freeze({ id: "exterior", titleKey: "gallery.exterior", captionKey: "gallery.exterior.caption", slug: "10-exterior", count: 6 }),
+  Object.freeze({ id: "entrada", titleKey: "gallery.entrada", captionKey: "gallery.entrada.caption", slug: "11-entrada-guardabotas", count: 1 })
 ]);
 
 const GALLERY_PHOTOS = Object.freeze(PHOTO_GROUPS.flatMap((group) =>
   Array.from({ length: group.count }, (_, index) => Object.freeze({
     categoryKey: group.titleKey,
-    captionKey: `photo.${group.id}.${index}`,
+    captionKey: group.captionKey ?? `photo.${group.id}.${index}`,
     groupId: group.id,
     src: `assets/photos/${group.slug}-${String(group.files?.[index] ?? index + 1).padStart(2, "0")}.webp`
   }))
 ));
 
 const HERO_SEQUENCE = Object.freeze([
-  ["01-dormitorio-principal-03", "photo.principal.title"],
-  ["06-sala-01", "photo.sala.0"],
-  ["07-comedor-01", "photo.comedor.0"],
-  ["05-cocina-01", "photo.cocina.0"],
-  ["02-dormitorio-futon-01", "photo.futon.0"],
-  ["02-dormitorio-futon-10", "photo.futon.9"],
-  ["03-dormitorio-literas-10", "photo.literas.title"],
-  ["04-banos-04", "hero.caption.bathroom"],
-  ["08-balcon-01", "photo.balcon.title"],
-  ["09-exterior-01", "photo.exterior.0"],
-  ["10-piscina-01", "photo.piscina.title"],
-  ["11-entorno-01", "photo.entorno.0"],
-  ["11-entorno-02", "photo.entorno.1"]
+  ["01-sala-01", "gallery.sala"],
+  ["02-cocina-completa-01", "gallery.cocina"],
+  ["03-comedor-01", "gallery.comedor"],
+  ["04-habitacion-1-01", "gallery.habitacion1"],
+  ["05-habitacion-2-01", "gallery.habitacion2"],
+  ["06-habitacion-3-01", "gallery.habitacion3"],
+  ["07-bano-completo-1-01", "gallery.bano1"],
+  ["08-bano-completo-2-01", "gallery.bano2"],
+  ["09-balcon-01", "gallery.balcon"],
+  ["10-exterior-01", "gallery.exterior"],
+  ["11-entrada-guardabotas-01", "gallery.entrada"]
 ]);
 
 const HERO_PHOTOS = Object.freeze(HERO_SEQUENCE.map(([basename, captionKey]) => {
