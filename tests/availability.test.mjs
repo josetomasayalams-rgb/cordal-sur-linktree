@@ -152,9 +152,10 @@ test("builds localized WhatsApp enquiries with optional estimates", () => {
   assert.doesNotMatch(api.buildWhatsappMessage("2026-07-18", "2026-07-19", false), /1 noches/);
 });
 
-test("loads preferences before availability and availability before the existing app", () => {
+test("loads preferences and property data before the application", () => {
   const preferences = html.indexOf('<script src="preferences.js" defer>');
+  const propertyData = html.indexOf('<script src="property-data.js" defer>');
   const availability = html.indexOf('<script src="availability.js" defer>');
   const app = html.indexOf('<script src="app.js" defer>');
-  assert.ok(preferences > 0 && preferences < availability && availability < app);
+  assert.ok(preferences > 0 && preferences < propertyData && propertyData < availability && availability < app);
 });
