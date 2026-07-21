@@ -608,16 +608,19 @@ function initializeGallery() {
       description.textContent = t(group.captionKey);
       const grid = document.createElement("div");
       grid.className = "gallery-photo-grid";
-      GALLERY_PHOTOS.filter((photo) => photo.groupId === group.id).forEach((photo, index) => {
+      GALLERY_PHOTOS.filter((photo) => photo.groupId === group.id).forEach((photo) => {
         const figure = document.createElement("figure");
         figure.className = "gallery-photo-card";
         figure.id = `gallery-photo-${photo.id}`;
         const image = document.createElement("img");
-        image.src = index === 0 ? photo.src : photo.thumbnail;
+        image.src = photo.thumbnail;
         image.dataset.originalSrc = photo.src;
         image.dataset.photoId = photo.id;
         image.alt = photoAlt(photo);
-        image.loading = index === 0 ? "eager" : "lazy";
+        image.width = photo.width;
+        image.height = photo.height;
+        image.style.aspectRatio = `${photo.width} / ${photo.height}`;
+        image.loading = "lazy";
         image.decoding = "async";
         image.addEventListener("load", () => {
           image.classList.add("is-loaded");
@@ -625,6 +628,7 @@ function initializeGallery() {
         });
         image.addEventListener("error", () => {
           if (image.src.endsWith(photo.thumbnail)) {
+            imageObserver?.unobserve(image);
             figure.remove();
             live.textContent = t("gallery.photo.unavailable");
           } else {
@@ -638,6 +642,7 @@ function initializeGallery() {
       fragment.append(section);
     });
     tour.replaceChildren(fragment);
+    const renderedImages = Array.from(tour.querySelectorAll("img[data-original-src]"));
     if ("IntersectionObserver" in window) {
       imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach((entry) => {
@@ -647,15 +652,16 @@ function initializeGallery() {
           observer.unobserve(image);
         });
       }, { root: scrollArea, rootMargin: "600px 0px" });
-      tour.querySelectorAll("img[data-original-src]").forEach((image) => imageObserver.observe(image));
+      renderedImages.forEach((image) => imageObserver.observe(image));
     } else {
-      tour.querySelectorAll("img[data-original-src]").forEach((image) => { image.src = image.dataset.originalSrc; });
+      renderedImages.forEach((image) => { image.src = image.dataset.originalSrc; });
     }
   };
   const scrollToGroup = (groupId, announce = true) => {
     const section = document.querySelector(`#gallery-group-${groupId}`);
     if (!section) return;
     setActiveGroup(groupId);
+    if (!dialog.open || !section.isConnected) return;
     const top = scrollArea.scrollTop + section.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top;
     scrollToPosition(top);
     if (announce) live.textContent = `${section.querySelector("h3")?.textContent || ""}. ${section.querySelector("p")?.textContent || ""}`;
@@ -664,6 +670,7 @@ function initializeGallery() {
     const photo = GALLERY_PHOTOS[index] || GALLERY_PHOTOS[0];
     const card = document.querySelector(`#gallery-photo-${photo.id}`);
     setActiveGroup(photo.groupId);
+    if (!dialog.open || !card?.isConnected) return;
     if (card) {
       const top = scrollArea.scrollTop + card.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top - Math.max(0, (scrollArea.clientHeight - card.clientHeight) / 2);
       scrollArea.scrollTo({ top, behavior: "auto" });

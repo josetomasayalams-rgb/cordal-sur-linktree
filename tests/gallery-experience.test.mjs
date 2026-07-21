@@ -54,6 +54,8 @@ test("registers Arrau as a complete, future-ready property", () => {
   assert.deepEqual(new Set(arrau.previewOrder), new Set(arrau.photos.map(({ id }) => id)));
 
   for (const photo of arrau.photos) {
+    assert.ok(Number.isInteger(photo.width) && photo.width > 0, `Missing width for ${photo.id}`);
+    assert.ok(Number.isInteger(photo.height) && photo.height > 0, `Missing height for ${photo.id}`);
     assert.ok(fs.existsSync(new URL(`../${photo.src}`, import.meta.url)), `Missing original ${photo.src}`);
     assert.ok(fs.existsSync(new URL(`../${photo.thumbnail}`, import.meta.url)), `Missing thumbnail ${photo.thumbnail}`);
     assert.match(photo.src, /^assets\/photos\/(?!thumbs\/).+\.webp$/);
@@ -116,6 +118,13 @@ test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tou
   assert.match(appSource, /counter\.textContent = group \? t\("gallery\.counter", \{ current, total \}\) : String\(total\)/);
   assert.match(appSource, /header\.dataset\.group = group\?\.id \|\| "property"/);
   assert.match(appSource, /header\.dataset\.photoIndex = String\(current\)/);
+  assert.match(appSource, /image\.src = photo\.thumbnail/);
+  assert.match(appSource, /image\.width = photo\.width/);
+  assert.match(appSource, /image\.height = photo\.height/);
+  assert.match(appSource, /image\.style\.aspectRatio = `\$\{photo\.width\} \/ \$\{photo\.height\}`/);
+  assert.match(appSource, /image\.loading = "lazy"/);
+  assert.doesNotMatch(appSource, /galleryLayoutReady|Promise\.all\(renderedImages/);
+  assert.match(appSource, /if \(!dialog\.open \|\| !section\.isConnected\) return/);
   assert.match(appSource, /const scrollToPosition = \(top\) =>/);
   assert.match(appSource, /Math\.min\(260, Math\.max\(150, Math\.abs\(distance\) \* \.035\)\)/);
   assert.match(appSource, /scrollArea\.addEventListener\("pointerdown", cancelScrollAnimation/);
@@ -135,9 +144,9 @@ test("shows photo position only in the island, never over the photographs", () =
 });
 
 test("cache-busts every runtime asset with the published build id", () => {
-  assert.match(html, /data-build="gallery-photo-counter-20260721"/);
+  assert.match(html, /data-build="gallery-photo-counter-20260721b"/);
   for (const resource of ["styles.css", "glass.css", "preferences.js", "property-data.js", "availability.js", "app.js", "glass.js"]) {
-    assert.ok(html.includes(`${resource}?v=gallery-photo-counter-20260721`), `Missing cache version for ${resource}`);
+    assert.ok(html.includes(`${resource}?v=gallery-photo-counter-20260721b`), `Missing cache version for ${resource}`);
   }
 });
 
