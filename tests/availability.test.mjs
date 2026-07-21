@@ -52,6 +52,18 @@ test("prices Sunday through Thursday at CLP 260,000 and Friday/Saturday at CLP 2
   assert.deepEqual(Array.from(quote.lines, (line) => line.kind), ["weekday", "weekend", "weekend"]);
 });
 
+test("requires a minimum stay of two complete nights", () => {
+  const { api } = loadAvailability();
+  const range = { from: "2026-07-17", to: "2026-10-01", endExclusive: true };
+  assert.equal(api.CONFIG.minimumNights, 2);
+  assert.equal(api.meetsMinimumStay("2026-07-17", "2026-07-18"), false);
+  assert.equal(api.meetsMinimumStay("2026-07-17", "2026-07-19"), true);
+  assert.equal(api.meetsMinimumStay("2026-07-17", "2026-07-20"), true);
+  assert.equal(api.isBookableStay("2026-07-17", "2026-07-18", range, []), false);
+  assert.equal(api.isBookableStay("2026-07-17", "2026-07-19", range, []), true);
+  assert.throws(() => api.buildWhatsappMessage("2026-07-17", "2026-07-18", true), /Minimum stay is two nights/);
+});
+
 test("keeps the full September season and stops before October", () => {
   const { api } = loadAvailability();
   assert.equal(api.CONFIG.bookingEndExclusive, "2026-10-01");
@@ -65,6 +77,12 @@ test("keeps the full September season and stops before October", () => {
     to: "2026-10-01",
     endExclusive: true,
   });
+  const range = { from: "2026-07-18", to: "2026-10-01", endExclusive: true };
+  assert.equal(api.canStartStay("2026-09-29", range, []), true, "two September nights remain selectable");
+  assert.equal(api.isBookableStay("2026-09-29", "2026-10-01", range, []), true, "the exclusive boundary is a valid checkout");
+  assert.equal(api.canStartStay("2026-09-30", range, []), false, "the boundary leaves only one night");
+  assert.equal(api.isBookableStay("2026-09-30", "2026-10-02", range, []), false, "a stay cannot cross the boundary");
+  assert.deepEqual(Array.from(api.quoteRange("2026-09-29", "2026-10-01").lines, (line) => line.date), ["2026-09-29", "2026-09-30"]);
 });
 
 test("keeps exclusive checkout semantics and blocks only occupied nights", () => {
@@ -73,7 +91,23 @@ test("keeps exclusive checkout semantics and blocks only occupied nights", () =>
   assert.equal(api.isBlocked("2026-07-20", blocked), true);
   assert.equal(api.isBlocked("2026-07-24", blocked), false);
   assert.equal(api.rangeHasBlockedNight("2026-07-18", "2026-07-20", blocked), false, "reserved arrival can be used as checkout");
+  assert.equal(api.meetsMinimumStay("2026-07-18", "2026-07-20"), true, "reserved arrival remains a valid checkout after two nights");
+  assert.equal(api.isBookableStay("2026-07-18", "2026-07-20", { from: "2026-07-17", to: "2026-10-01" }, blocked), true);
   assert.equal(api.rangeHasBlockedNight("2026-07-18", "2026-07-21", blocked), true);
+  assert.equal(api.canStartStay("2026-07-18", { from: "2026-07-17", to: "2026-10-01" }, blocked), true);
+  assert.equal(api.canStartStay("2026-07-19", { from: "2026-07-17", to: "2026-10-01" }, blocked), false);
+});
+
+test("invalidates selected dates when refreshed availability changes", () => {
+  const { api } = loadAvailability();
+  const range = { from: "2026-07-21", to: "2026-10-01", endExclusive: true };
+  assert.equal(api.isSelectionValid("2026-07-26", "2026-07-28", range, []), true);
+  assert.equal(api.isSelectionValid("2026-07-26", "2026-07-28", range, [{ startDate: "2026-07-27", endDate: "2026-07-29" }]), false);
+  assert.equal(api.isSelectionValid("2026-07-26", "2026-07-28", { ...range, from: "2026-07-29" }, []), false);
+  assert.equal(api.isSelectionValid("2026-07-26", null, range, [{ startDate: "2026-07-27", endDate: "2026-07-29" }]), false);
+  assert.equal(api.isSelectionValid(null, null, range, []), true);
+  assert.match(source, /const invalidatedSelection = Boolean\(state\.arrival && !selectionIsValid\(\)\)/);
+  assert.match(source, /invalidatedSelection\) clearSelectionState\(\)/);
 });
 
 test("accepts only the minimal versioned contract and rejects source details", () => {
@@ -93,7 +127,7 @@ test("accepts only the minimal versioned contract and rejects source details", (
   assert.equal(api.validatePayload({ ...payload, status: "free" }), null);
 });
 
-test("opens the selected-date card first and reveals prices only from its primary button", () => {
+test("reveals prices only after a valid two-night range", () => {
   for (const id of [
     "availability-status",
     "availability-refresh",
@@ -108,20 +142,49 @@ test("opens the selected-date card first and reveals prices only from its primar
     "availability-live",
   ]) assert.ok(html.includes(`id="${id}"`), `Missing #${id}`);
   assert.match(html, /id="availability-selection" hidden/);
+  assert.match(html, /class="availability-minimum-stay"[^>]*data-i18n="availability\.minimumStay"/);
   assert.match(html, /id="availability-reveal-price"[^>]*aria-controls="availability-quote"[^>]*aria-expanded="false"/);
   assert.match(html, /id="availability-quote"[^>]*hidden/);
+  assert.match(html, /id="availability-quote"[^>]*tabindex="-1"/);
   assert.match(styles, /\[hidden\] \{ display: none !important; \}/);
   assert.match(source, /elements\.selection\.hidden = !selected/);
   assert.match(source, /pricesRevealed: false/);
-  assert.match(source, /elements\.quote\.hidden = !state\.pricesRevealed/);
-  assert.match(source, /elements\.revealPrice\.hidden = state\.pricesRevealed/);
+  assert.match(source, /elements\.quote\.hidden = !complete \|\| !state\.pricesRevealed/);
+  assert.match(source, /elements\.revealPrice\.hidden = !complete \|\| state\.pricesRevealed/);
   assert.match(source, /elements\.consult\.hidden = !complete \|\| !state\.pricesRevealed/);
   assert.match(source, /state\.pricesRevealed = true;\s*renderSelection\(\);/);
   assert.match(source, /state\.pricesRevealed = false;/);
-  assert.match(source, /if \(!state\.pricesRevealed\) \{[\s\S]*elements\.subtotal\.textContent = "—"/);
-  assert.match(source, /complete \? state\.departure : shiftDays\(state\.arrival, 1\)/);
+  assert.match(source, /if \(!complete \|\| !state\.pricesRevealed\) \{[\s\S]*elements\.subtotal\.textContent = "—"/);
+  assert.match(source, /const quote = complete \? quoteRange\(state\.arrival, state\.departure\) : null/);
+  assert.doesNotMatch(source, /shiftDays\(state\.arrival, 1\)/);
+  assert.match(source, /minimumNights: 2/);
+  assert.match(source, /button\.dataset\.minimumStay = "arrival"/);
+  assert.match(source, /button\.dataset\.minimumStay = "checkout"/);
+  assert.match(source, /if \(!meetsMinimumStay\(state\.arrival, date\)\)/);
+  assert.match(source, /!state\.departure \|\| !meetsMinimumStay\(state\.arrival, state\.departure\)/);
+  assert.match(source, /announce\("availability\.minimumStay\.error"\)/);
+  assert.match(source, /button === document\.activeElement/);
+  assert.match(source, /restoreCalendarFocus\(date\)/);
+  assert.match(source, /const focusDate = state\.arrival;[\s\S]*ensureVisibleAndFocus\(focusDate\)/);
+  assert.match(source, /elements\.quote\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(source, /event\.key === "Enter" \|\| event\.key === " "/);
+  assert.match(source, /if \(!selected\) \{[\s\S]*elements\.quote\.hidden = true;[\s\S]*elements\.consult\.hidden = true;/);
+  assert.match(styles, /\.availability-day\.is-minimum-stay[^}]+cursor: not-allowed/s);
   assert.doesNotMatch(html, /availability-show-prices|Mostrar precios/);
-  for (const key of ["availability.revealPrices", "availability.revealPrices.detail", "availability.pricesRevealed"]) {
+  for (const key of [
+    "availability.minimumStay",
+    "availability.minimumStay.short",
+    "availability.minimumStay.checkout",
+    "availability.minimumStay.error",
+    "availability.minimumStay.arrival",
+    "availability.minimumStay.arrivalUnavailable",
+    "availability.checkoutOnly",
+    "availability.outsideRange",
+    "availability.selectionInvalidated",
+    "availability.revealPrices",
+    "availability.revealPrices.detail",
+    "availability.pricesRevealed",
+  ]) {
     assert.ok(preferencesSource.includes(`"${key}"`), `Missing translation ${key}`);
   }
   for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"]) {
@@ -148,14 +211,13 @@ test("builds localized WhatsApp enquiries with optional estimates", () => {
     assert.match(priced, /confirm|confirma/i);
   }
   preferences.setLanguage("es");
-  assert.match(api.buildWhatsappMessage("2026-07-18", "2026-07-19", false), /\(1 noche\)/);
-  assert.doesNotMatch(api.buildWhatsappMessage("2026-07-18", "2026-07-19", false), /1 noches/);
+  assert.throws(() => api.buildWhatsappMessage("2026-07-18", "2026-07-19", false), /Minimum stay is two nights/);
 });
 
 test("loads preferences and property data before the application", () => {
-  const preferences = html.indexOf('<script src="preferences.js?v=gallery-photo-counter-20260721b" defer>');
-  const propertyData = html.indexOf('<script src="property-data.js?v=gallery-photo-counter-20260721b" defer>');
-  const availability = html.indexOf('<script src="availability.js?v=gallery-photo-counter-20260721b" defer>');
-  const app = html.indexOf('<script src="app.js?v=gallery-photo-counter-20260721b" defer>');
+  const preferences = html.indexOf('<script src="preferences.js?v=minimum-two-night-stay-20260721" defer>');
+  const propertyData = html.indexOf('<script src="property-data.js?v=minimum-two-night-stay-20260721" defer>');
+  const availability = html.indexOf('<script src="availability.js?v=minimum-two-night-stay-20260721" defer>');
+  const app = html.indexOf('<script src="app.js?v=minimum-two-night-stay-20260721" defer>');
   assert.ok(preferences > 0 && preferences < propertyData && propertyData < availability && availability < app);
 });
