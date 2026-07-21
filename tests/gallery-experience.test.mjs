@@ -22,11 +22,11 @@ test("registers Arrau as a complete, future-ready property", () => {
   assert.equal(arrau.name, "Arrau");
   assert.equal(arrau.brand, "Cordal Sur");
   assert.equal(arrau.groups.length, 11);
-  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 46);
-  assert.equal(arrau.photos.length, 46);
-  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 46);
-  assert.equal(arrau.previewOrder.length, 46);
-  assert.equal(new Set(arrau.previewOrder).size, 46);
+  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 38);
+  assert.equal(arrau.photos.length, 38);
+  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 38);
+  assert.equal(arrau.previewOrder.length, 38);
+  assert.equal(new Set(arrau.previewOrder).size, 38);
   assert.ok(!arrau.photos.some(({ id }) => id === "06-habitacion-3-03"));
   assert.deepEqual(Array.from(arrau.previewOrder.slice(0, 5)), [
     "01-sala-01",
