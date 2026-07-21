@@ -467,157 +467,126 @@ function initializeGallery() {
   const openButton = document.querySelector("#open-gallery");
   const closeButton = document.querySelector("#gallery-close");
   const filters = document.querySelector("#gallery-filters");
-  const stage = document.querySelector("#gallery-stage");
-  const imageViewport = document.querySelector("#gallery-image-viewport");
-  const ambient = document.querySelector("#gallery-ambient");
-  const mainImage = document.querySelector("#gallery-main-image");
-  const previous = document.querySelector("#gallery-previous");
-  const next = document.querySelector("#gallery-next");
+  const scrollArea = document.querySelector("#gallery-scroll");
+  const tour = document.querySelector("#gallery-tour");
   const counter = document.querySelector("#gallery-counter");
-  const category = document.querySelector("#gallery-photo-category");
-  const caption = document.querySelector("#gallery-photo-caption");
-  const thumbnails = document.querySelector("#gallery-thumbnails");
   const live = document.querySelector("#gallery-live");
-  const zoomOut = document.querySelector("#gallery-zoom-out");
-  const zoomReset = document.querySelector("#gallery-zoom-reset");
-  const zoomIn = document.querySelector("#gallery-zoom-in");
-  if (!dialog || !openButton || !closeButton || !filters || !stage || !imageViewport || !ambient || !mainImage || !previous || !next || !counter || !category || !caption || !thumbnails || !live || !zoomOut || !zoomReset || !zoomIn) return;
+  if (!dialog || !openButton || !closeButton || !filters || !scrollArea || !tour || !counter || !live) return;
 
   let returnFocus = openButton;
-  let currentIndex = 0;
-  let activeGroup = "all";
-  let imageRequest = 0;
-  let zoomScale = 1;
-  let panX = 0;
-  let panY = 0;
-  const failed = new Set();
-  const activePointers = new Map();
-  let pointerGesture = null;
+  let imageObserver;
+  const galleryReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
-  const clampPan = () => {
-    const bounds = imageViewport.getBoundingClientRect();
-    const maxX = Math.max(0, (bounds.width * (zoomScale - 1)) / 2);
-    const maxY = Math.max(0, (bounds.height * (zoomScale - 1)) / 2);
-    panX = Math.min(maxX, Math.max(-maxX, panX));
-    panY = Math.min(maxY, Math.max(-maxY, panY));
-  };
-  const applyZoom = (nextScale = zoomScale, nextX = panX, nextY = panY) => {
-    zoomScale = Math.min(4, Math.max(1, nextScale));
-    panX = zoomScale === 1 ? 0 : nextX;
-    panY = zoomScale === 1 ? 0 : nextY;
-    clampPan();
-    mainImage.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoomScale})`;
-    imageViewport.classList.toggle("is-zoomed", zoomScale > 1);
-    zoomOut.disabled = zoomScale <= 1;
-    zoomIn.disabled = zoomScale >= 4;
-    zoomReset.textContent = `${Math.round(zoomScale * 100)}%`;
-    zoomReset.disabled = zoomScale === 1;
-  };
-  const resetZoom = () => applyZoom(1, 0, 0);
-
-  const availableIndexes = () => GALLERY_PHOTOS
-    .map((photo, index) => ({ photo, index }))
-    .filter(({ photo }) => (activeGroup === "all" || photo.groupId === activeGroup) && !failed.has(photo.id))
-    .map(({ index }) => index);
-  const preloadAdjacent = () => {
-    if (typeof Image !== "function") return;
-    const indexes = availableIndexes();
-    const position = indexes.indexOf(currentIndex);
-    if (position < 0) return;
-    [-1, 1].forEach((offset) => {
-      const image = new Image();
-      image.src = GALLERY_PHOTOS[indexes[(position + offset + indexes.length) % indexes.length]].src;
+  const setActiveGroup = (groupId) => {
+    filters.querySelectorAll("[data-gallery-group]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.galleryGroup === groupId));
     });
   };
-  const syncActiveThumbnail = () => {
-    thumbnails.querySelectorAll("button").forEach((button) => {
-      const active = Number(button.dataset.galleryIndex) === currentIndex;
-      button.toggleAttribute("aria-current", active);
-      if (active) {
-        thumbnails.scrollLeft = Math.max(0, button.offsetLeft - (thumbnails.clientWidth - button.clientWidth) / 2);
-      }
-    });
-  };
-  const showPhoto = (requestedIndex, announce = false) => {
-    const indexes = availableIndexes();
-    if (!indexes.length) return;
-    currentIndex = indexes.includes(requestedIndex) ? requestedIndex : indexes[0];
-    const photo = GALLERY_PHOTOS[currentIndex];
-    resetZoom();
-    const request = ++imageRequest;
-    const applyImage = () => {
-      if (request !== imageRequest) return;
-      mainImage.dataset.photoId = photo.id;
-      mainImage.src = photo.src;
-      mainImage.alt = photoAlt(photo);
-      mainImage.classList.remove("is-loading");
-    };
-    const handleImageError = () => {
-      if (request !== imageRequest) return;
-      failed.add(photo.id);
-      live.textContent = t("gallery.photo.unavailable");
-      renderThumbnails();
-      navigate(1);
-    };
-    mainImage.classList.add("is-loading");
-    if (typeof Image === "function") {
-      const loader = new Image();
-      loader.addEventListener("load", applyImage, { once: true });
-      loader.addEventListener("error", handleImageError, { once: true });
-      loader.src = photo.src;
-    } else {
-      applyImage();
-    }
-    ambient.style.backgroundImage = `url("${photo.src}")`;
-    category.textContent = t(photo.categoryKey);
-    caption.textContent = t(photo.captionKey);
-    counter.textContent = t("gallery.counter", { current: indexes.indexOf(currentIndex) + 1, total: indexes.length });
-    syncActiveThumbnail();
-    preloadAdjacent();
-    if (announce) live.textContent = `${category.textContent}. ${caption.textContent}. ${counter.textContent}`;
-  };
-  const navigate = (direction) => {
-    const indexes = availableIndexes();
-    if (!indexes.length) return;
-    const position = Math.max(0, indexes.indexOf(currentIndex));
-    showPhoto(indexes[(position + direction + indexes.length) % indexes.length], true);
-  };
-  const renderFilters = () => {
+  const renderNavigation = () => {
     const fragment = document.createDocumentFragment();
-    [{ id: "all", titleKey: "gallery.all", count: GALLERY_PHOTOS.length }, ...PHOTO_GROUPS].forEach((group) => {
+    PHOTO_GROUPS.forEach((group) => {
+      const cover = GALLERY_PHOTOS.find((photo) => photo.groupId === group.id);
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.galleryGroup = group.id;
-      button.setAttribute("aria-pressed", String(group.id === activeGroup));
-      button.textContent = `${t(group.titleKey)} · ${group.count}`;
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-controls", `gallery-group-${group.id}`);
+      const image = document.createElement("img");
+      image.src = cover.thumbnail;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      const label = document.createElement("span");
+      label.textContent = `${t(group.titleKey)} · ${group.count}`;
+      button.append(image, label);
       fragment.append(button);
     });
     filters.replaceChildren(fragment);
   };
-  const renderThumbnails = () => {
+  const renderTour = () => {
+    imageObserver?.disconnect();
     const fragment = document.createDocumentFragment();
-    const indexes = availableIndexes();
-    indexes.forEach((index, position) => {
-      const photo = GALLERY_PHOTOS[index];
-      const item = document.createElement("span");
-      item.setAttribute("role", "listitem");
-      const button = document.createElement("button");
-      button.type = "button";
-      button.dataset.galleryIndex = String(index);
-      button.setAttribute("aria-label", t("gallery.thumbnail.aria", { current: position + 1, total: indexes.length, description: photoAlt(photo) }));
-      if (index === currentIndex) button.setAttribute("aria-current", "true");
-      const image = document.createElement("img");
-      image.src = photo.thumbnail;
-      image.alt = "";
-      image.loading = "lazy";
-      image.decoding = "async";
-      button.append(image);
-      item.append(button);
-      fragment.append(item);
+    PHOTO_GROUPS.forEach((group) => {
+      const section = document.createElement("section");
+      section.className = "gallery-tour-section";
+      section.id = `gallery-group-${group.id}`;
+      section.dataset.gallerySection = group.id;
+      section.tabIndex = -1;
+      const heading = document.createElement("h3");
+      heading.textContent = t(group.titleKey);
+      const description = document.createElement("p");
+      description.textContent = t(group.captionKey);
+      const grid = document.createElement("div");
+      grid.className = "gallery-photo-grid";
+      GALLERY_PHOTOS.filter((photo) => photo.groupId === group.id).forEach((photo, index) => {
+        const figure = document.createElement("figure");
+        figure.className = "gallery-photo-card";
+        figure.id = `gallery-photo-${photo.id}`;
+        const image = document.createElement("img");
+        image.src = index === 0 ? photo.src : photo.thumbnail;
+        image.dataset.originalSrc = photo.src;
+        image.dataset.photoId = photo.id;
+        image.alt = photoAlt(photo);
+        image.loading = index === 0 ? "eager" : "lazy";
+        image.decoding = "async";
+        image.addEventListener("load", () => {
+          image.classList.add("is-loaded");
+          figure.classList.toggle("is-portrait", image.naturalHeight > image.naturalWidth);
+        });
+        image.addEventListener("error", () => {
+          if (image.src.endsWith(photo.thumbnail)) {
+            figure.remove();
+            live.textContent = t("gallery.photo.unavailable");
+          } else {
+            image.src = photo.thumbnail;
+          }
+        });
+        figure.append(image);
+        grid.append(figure);
+      });
+      section.append(heading, description, grid);
+      fragment.append(section);
     });
-    thumbnails.replaceChildren(fragment);
+    tour.replaceChildren(fragment);
+    if ("IntersectionObserver" in window) {
+      imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const image = entry.target;
+          if (image.dataset.originalSrc && !image.src.endsWith(image.dataset.originalSrc)) image.src = image.dataset.originalSrc;
+          observer.unobserve(image);
+        });
+      }, { root: scrollArea, rootMargin: "600px 0px" });
+      tour.querySelectorAll("img[data-original-src]").forEach((image) => imageObserver.observe(image));
+    } else {
+      tour.querySelectorAll("img[data-original-src]").forEach((image) => { image.src = image.dataset.originalSrc; });
+    }
+  };
+  const scrollToGroup = (groupId, announce = true) => {
+    const section = document.querySelector(`#gallery-group-${groupId}`);
+    if (!section) return;
+    setActiveGroup(groupId);
+    const top = scrollArea.scrollTop + section.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top;
+    scrollArea.scrollTo({ top, behavior: galleryReducedMotion?.matches ? "auto" : "smooth" });
+    if (announce) live.textContent = `${section.querySelector("h3")?.textContent || ""}. ${section.querySelector("p")?.textContent || ""}`;
+  };
+  const scrollToPhoto = (index) => {
+    const photo = GALLERY_PHOTOS[index] || GALLERY_PHOTOS[0];
+    const card = document.querySelector(`#gallery-photo-${photo.id}`);
+    setActiveGroup(photo.groupId);
+    if (card) {
+      const top = scrollArea.scrollTop + card.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top - Math.max(0, (scrollArea.clientHeight - card.clientHeight) / 2);
+      scrollArea.scrollTo({ top, behavior: "auto" });
+    }
+  };
+  const render = () => {
+    counter.textContent = String(GALLERY_PHOTOS.length);
+    counter.setAttribute("aria-label", t("gallery.open", { count: GALLERY_PHOTOS.length }));
+    renderNavigation();
+    renderTour();
   };
   const close = () => {
+    imageObserver?.disconnect();
     document.body.classList.remove("gallery-open");
     if (dialog.open) dialog.close();
     else dialog.removeAttribute("open");
@@ -625,117 +594,42 @@ function initializeGallery() {
 
   openButton.addEventListener("click", () => {
     returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : openButton;
-    activeGroup = "all";
-    currentIndex = Number(openButton.dataset.startIndex || 0);
+    const hasStartPhoto = openButton.dataset.startIndex !== undefined;
+    const startIndex = Number(openButton.dataset.startIndex || 0);
     delete openButton.dataset.startIndex;
-    renderFilters();
-    renderThumbnails();
-    showPhoto(currentIndex);
+    render();
     document.body.classList.add("gallery-open");
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
+    scrollArea.scrollTop = 0;
+    requestAnimationFrame(() => {
+      if (hasStartPhoto) scrollToPhoto(startIndex);
+      else setActiveGroup(PHOTO_GROUPS[0]?.id);
+    });
     closeButton.focus();
   });
   closeButton.addEventListener("click", close);
   dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
   dialog.addEventListener("cancel", (event) => { event.preventDefault(); close(); });
   dialog.addEventListener("close", () => {
+    imageObserver?.disconnect();
     document.body.classList.remove("gallery-open");
     returnFocus?.focus();
   });
   filters.addEventListener("click", (event) => {
     const button = event.target.closest("[data-gallery-group]");
-    if (!button) return;
-    activeGroup = button.dataset.galleryGroup;
-    renderFilters();
-    const indexes = availableIndexes();
-    if (indexes.length) currentIndex = indexes[0];
-    renderThumbnails();
-    showPhoto(currentIndex, true);
-  });
-  thumbnails.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-gallery-index]");
-    if (button) showPhoto(Number(button.dataset.galleryIndex), true);
-  });
-  stage.addEventListener("click", (event) => {
-    const navigationButton = event.target.closest(".gallery-nav");
-    if (!navigationButton) return;
-    navigate(navigationButton === next ? 1 : -1);
-  });
-  zoomOut.addEventListener("click", () => applyZoom(zoomScale - .5));
-  zoomIn.addEventListener("click", () => applyZoom(zoomScale + .5));
-  zoomReset.addEventListener("click", resetZoom);
-  imageViewport.addEventListener("dblclick", (event) => {
-    event.preventDefault();
-    applyZoom(zoomScale > 1 ? 1 : 2, 0, 0);
+    if (button) scrollToGroup(button.dataset.galleryGroup);
   });
   dialog.addEventListener("keydown", (event) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
-    if (event.key === "ArrowLeft") { event.preventDefault(); navigate(-1); }
-    if (event.key === "ArrowRight") { event.preventDefault(); navigate(1); }
-    if (event.key === "Home") { event.preventDefault(); showPhoto(availableIndexes()[0], true); }
-    if (event.key === "End") { event.preventDefault(); showPhoto(availableIndexes().at(-1), true); }
+    if (event.key === "Home") { event.preventDefault(); scrollArea.scrollTo({ top: 0, behavior: "auto" }); }
+    if (event.key === "End") { event.preventDefault(); scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: "auto" }); }
   });
-  const pointerDistance = () => {
-    const [first, second] = Array.from(activePointers.values());
-    return first && second ? Math.hypot(second.x - first.x, second.y - first.y) : 0;
-  };
-  imageViewport.addEventListener("pointerdown", (event) => {
-    imageViewport.setPointerCapture?.(event.pointerId);
-    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (activePointers.size === 2) {
-      pointerGesture = { type: "pinch", distance: pointerDistance(), scale: zoomScale };
-      return;
-    }
-    pointerGesture = {
-      type: zoomScale > 1 ? "pan" : "swipe",
-      startX: event.clientX,
-      startY: event.clientY,
-      panX,
-      panY,
-      moved: false
-    };
-  });
-  imageViewport.addEventListener("pointermove", (event) => {
-    if (!activePointers.has(event.pointerId)) return;
-    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (activePointers.size >= 2 && pointerGesture?.type === "pinch") {
-      const distance = pointerDistance();
-      if (pointerGesture.distance > 0) applyZoom(pointerGesture.scale * distance / pointerGesture.distance);
-      event.preventDefault();
-      return;
-    }
-    if (pointerGesture?.type === "pan") {
-      const deltaX = event.clientX - pointerGesture.startX;
-      const deltaY = event.clientY - pointerGesture.startY;
-      pointerGesture.moved ||= Math.hypot(deltaX, deltaY) > 4;
-      applyZoom(zoomScale, pointerGesture.panX + deltaX, pointerGesture.panY + deltaY);
-      event.preventDefault();
-    }
-  });
-  const finishPointer = (event, cancelled = false) => {
-    if (!activePointers.has(event.pointerId)) return;
-    const gesture = pointerGesture;
-    activePointers.delete(event.pointerId);
-    if (activePointers.size) {
-      const remaining = Array.from(activePointers.values())[0];
-      pointerGesture = { type: zoomScale > 1 ? "pan" : "swipe", startX: remaining.x, startY: remaining.y, panX, panY, moved: false };
-      return;
-    }
-    pointerGesture = null;
-    if (cancelled || gesture?.type !== "swipe" || zoomScale > 1) return;
-    const deltaX = event.clientX - gesture.startX;
-    const deltaY = event.clientY - gesture.startY;
-    if (Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) navigate(deltaX < 0 ? 1 : -1);
-  };
-  imageViewport.addEventListener("pointerup", (event) => finishPointer(event));
-  imageViewport.addEventListener("pointercancel", (event) => finishPointer(event, true));
-  stage.addEventListener("dragstart", (event) => event.preventDefault());
   PREFERENCES.subscribe(({ changed }) => {
-    if (changed !== "language") return;
-    renderFilters();
-    renderThumbnails();
-    showPhoto(currentIndex);
+    if (changed !== "language" || !dialog.open) return;
+    const scrollTop = scrollArea.scrollTop;
+    render();
+    scrollArea.scrollTop = scrollTop;
   });
 }
 
