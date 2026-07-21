@@ -81,6 +81,16 @@ test("keeps navigation and zoom chrome away from the photographs", () => {
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-photo-grid[^}]+columns: 1/s);
 });
 
+test("uses a compact clipped Cordal Sur header over the mobile photo tour", () => {
+  assert.match(html, /class="gallery-close-lockup"/);
+  assert.match(html, /class="gallery-close-symbol"/);
+  assert.match(html, /class="gallery-close-arrow">←<\/span>/);
+  assert.match(styles, /\.gallery-close-symbol[^}]+cordal-sur-symbol-reverse\.svg/s);
+  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header::before[^}]+clip-path:/s);
+  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-scroll[^}]+padding-top:/s);
+  assert.match(styles, /prefers-reduced-transparency: reduce/);
+});
+
 test("keeps the mobile refresh control aligned and removes the pull-down skip label", () => {
   assert.match(styles, /\.editorial-preview > \.preview-refresh\.glass-surface[^}]+position: absolute/s);
   assert.match(styles, /overscroll-behavior-y: none/);

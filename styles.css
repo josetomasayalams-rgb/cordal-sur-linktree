@@ -617,15 +617,30 @@ html[data-theme="dark"] .brand-stage--themed .brand-mark--dark { display: block;
   display: grid;
   place-items: center;
   padding: 0;
-  color: var(--forest);
-  background: transparent;
-  border: 1px solid var(--forest-20);
+  color: var(--ivory);
+  background: var(--forest);
+  border: 1px solid rgba(245, 247, 242, .26);
   border-radius: 50%;
   cursor: pointer;
   font: inherit;
-  font-size: 1.25rem;
   line-height: 1;
 }
+.gallery-close-lockup {
+  display: grid;
+  grid-template-rows: 22px 8px;
+  place-items: center;
+  gap: 1px;
+  transform: translateY(1px);
+}
+.gallery-close-symbol {
+  width: 24px;
+  height: 22px;
+  display: block;
+  background: currentColor;
+  -webkit-mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
+  mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
+}
+.gallery-close-arrow { font-size: .64rem; font-weight: 800; line-height: 1; }
 .gallery-scroll {
   min-height: 0;
   overflow-x: hidden;
@@ -849,7 +864,7 @@ html[data-theme="dark"] .gallery-header {
   border-bottom-color: rgba(220,230,225,.12);
 }
 html[data-theme="dark"] .gallery-header p:last-child { color: #b8c9c3; }
-html[data-theme="dark"] .gallery-close { color: #f5f7f2; background: transparent; border-color: rgba(220,230,225,.24); }
+html[data-theme="dark"] .gallery-close { color: #f5f7f2; background: #173a32; border-color: rgba(220,230,225,.26); }
 html[data-theme="dark"] .gallery-counter,
 html[data-theme="dark"] .gallery-filters button,
 html[data-theme="dark"] .gallery-tour-section > p { color: #b8c9c3; }
@@ -880,11 +895,71 @@ html[data-theme="dark"] :focus-visible { outline-color: #f5f7f2; box-shadow: 0 0
   .availability-day { min-height: 54px; }
 }
 @media (max-width: 479px) {
-  .gallery-header { grid-template-columns: 44px minmax(0, 1fr) 62px; gap: 9px; min-height: 70px; padding: max(8px, env(safe-area-inset-top)) 12px 8px; }
-  .gallery-header h2 { font-size: 1.18rem; }
-  .gallery-header p:last-child { font-size: .6rem; }
-  .gallery-counter { font-size: .58rem; }
-  .gallery-close { width: 44px; height: 44px; }
+  .gallery-dialog-inner { position: relative; display: block; }
+  .gallery-header {
+    position: absolute;
+    z-index: 5;
+    inset: 0 0 auto;
+    isolation: isolate;
+    grid-template-columns: 44px minmax(0, 1fr) 42px;
+    gap: 8px;
+    min-height: calc(62px + env(safe-area-inset-top));
+    padding: max(7px, env(safe-area-inset-top)) 10px 7px 8px;
+    color: var(--ivory);
+    background: transparent;
+    border-bottom: 0;
+    backdrop-filter: none;
+    pointer-events: none;
+  }
+  .gallery-header::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 4px 0 0 5px;
+    background: rgba(15, 42, 36, .82);
+    background: color-mix(in srgb, #0f2a24 82%, transparent);
+    border: 1px solid rgba(220, 230, 225, .18);
+    border-left-color: rgba(220, 230, 225, .28);
+    border-radius: 999px 0 0 999px;
+    box-shadow: 0 10px 28px rgba(4, 14, 11, .18);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%);
+    backdrop-filter: blur(16px) saturate(125%);
+    -webkit-backdrop-filter: blur(16px) saturate(125%);
+  }
+  .gallery-header::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: 11px;
+    bottom: 0;
+    left: 52px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(217, 162, 79, .58), rgba(220, 230, 225, .18) 48%, transparent);
+  }
+  .gallery-header > * { position: relative; z-index: 1; pointer-events: auto; }
+  html[data-theme="dark"] .gallery-header { color: #f5f7f2; background: transparent; border-bottom: 0; }
+  .gallery-header h2 { color: inherit; font-size: 1.04rem; }
+  .gallery-header p:last-child { margin-top: 2px; padding-bottom: 4px; color: #dce6e1; font-size: .58rem; }
+  html[data-theme="dark"] .gallery-header p:last-child { color: #dce6e1; }
+  .gallery-counter { color: #dce6e1; font-size: .58rem; }
+  html[data-theme="dark"] .gallery-counter { color: #dce6e1; }
+  .gallery-header .gallery-close {
+    width: 44px;
+    height: 44px;
+    color: #f5f7f2;
+    background: rgba(15, 42, 36, .94);
+    border-color: rgba(220, 230, 225, .28);
+    box-shadow: 0 6px 18px rgba(4, 14, 11, .22);
+  }
+  html[data-theme="dark"] .gallery-header .gallery-close { background: rgba(23, 58, 50, .96); }
+  .gallery-close-symbol { width: 22px; height: 20px; }
+  .gallery-close-lockup { grid-template-rows: 20px 7px; }
+  .gallery-close-arrow { font-size: .58rem; }
+  .gallery-scroll {
+    height: 100%;
+    padding-top: calc(62px + env(safe-area-inset-top));
+    scroll-padding-top: calc(68px + env(safe-area-inset-top));
+  }
   .gallery-filters { gap: 10px; padding: 16px 12px 30px; }
   .gallery-filters button { width: 98px; min-height: 130px; flex-basis: 98px; grid-template-rows: 96px auto; }
   .gallery-filters img { width: 98px; height: 96px; border-radius: 16px; }
@@ -894,6 +969,17 @@ html[data-theme="dark"] :focus-visible { outline-color: #f5f7f2; box-shadow: 0 0
   .gallery-tour-section > p { margin-bottom: 16px; }
   .gallery-photo-grid { columns: 1; }
   .gallery-photo-card { margin-bottom: 10px; border-radius: 14px; }
+}
+@media (max-width: 479px) and (prefers-reduced-transparency: reduce) {
+  .gallery-header::before { background: #0f2a24; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (max-width: 479px) and (forced-colors: active) {
+  .gallery-header { color: CanvasText; }
+  .gallery-header::before { background: Canvas; border-color: CanvasText; clip-path: none; backdrop-filter: none; }
+  .gallery-header::after { background: CanvasText; }
+  .gallery-header p:last-child,
+  .gallery-counter { color: CanvasText; }
+  .gallery-header .gallery-close { color: ButtonText; background: ButtonFace; border-color: ButtonText; box-shadow: none; }
 }
 @media (max-width: 359px) {
   .page-shell { padding-inline: 12px; }

@@ -36,6 +36,8 @@ assert.match(html, /<h2 class="hero-title">Arrau<\/h2>/);
 assert.match(html, /id="property-preview"/);
 assert.match(html, /Explorar 38 fotos/);
 assert.match(html, /id="gallery-tour"/);
+assert.match(html, /id="gallery-scroll"/);
+assert.match(html, /class="gallery-close-symbol"/);
 assert.match(html, /assets\/photos\/01-sala-02\.webp/);
 assert.doesNotMatch(html, /hero-layer-a|carousel-toggle|photo-viewer|1\/13/);
 

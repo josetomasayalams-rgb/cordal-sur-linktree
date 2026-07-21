@@ -200,7 +200,12 @@
   <dialog class="gallery-dialog" id="gallery-dialog" aria-labelledby="gallery-title" aria-describedby="gallery-description">
     <div class="gallery-dialog-inner">
       <header class="gallery-header">
-        <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">←</button>
+        <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">
+          <span class="gallery-close-lockup" aria-hidden="true">
+            <span class="gallery-close-symbol"></span>
+            <span class="gallery-close-arrow">←</span>
+          </span>
+        </button>
         <div>
           <p class="eyebrow" data-i18n="gallery.kicker">Colección fotográfica</p>
           <h2 id="gallery-title" data-i18n="gallery.title">Arrau</h2>
