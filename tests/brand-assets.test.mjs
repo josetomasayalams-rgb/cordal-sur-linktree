@@ -63,12 +63,15 @@ test("removes generic destination pictograms and renders decorative brand marks"
   assert.doesNotMatch(`${app}\n${html}\n${styles}\n${glass}`, /(?:src|url\()["']?https?:\/\/(?:static|content|www|http2|news)/i);
 });
 
-test("renders the reservation tray as accessible logo-only links", () => {
-  assert.doesNotMatch(app, /platform-label|platform-detail/);
+test("renders an accessible platform tray with a named finance portal", () => {
+  assert.doesNotMatch(app, /platform-detail/);
+  assert.match(app, /platformLabel\.className = "platform-label"/);
+  assert.match(app, /link\.id === "finance"/);
   assert.match(app, /anchor\.setAttribute\("aria-label", `\$\{labelText\}\. \$\{detailText\}`\)/);
   assert.match(app, /if \(type !== "platform"\)/);
   assert.match(styles, /\.platform-card \{[\s\S]*?min-height: 104px/);
   assert.match(styles, /\.platform-icon \.brand-mark \{ width: 52px; height: 52px; \}/);
+  assert.ok(app.includes("https://cordal-sur-finanzas.jayala2407.chatgpt.site"));
 });
 
 test("switches Cordal brand surfaces between light and dark treatments", () => {
