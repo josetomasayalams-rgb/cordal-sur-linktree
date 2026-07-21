@@ -67,6 +67,9 @@ assert.ok(!galleryWindow.GALLERY_PHOTOS.some(({ id }) => id === "06-habitacion-3
 assert.equal(galleryWindow.PREVIEW_PHOTOS[0].src, "assets/photos/01-sala-01.webp");
 assert.ok(styles.includes(".gallery-dialog"), "Faltan estilos de galería");
 assert.match(styles, /object-fit: contain/);
+assert.match(styles, /--brand-title-gradient: linear-gradient\(110deg, #102c26, #153b33 52%, #785018\)/);
+assert.match(styles, /\.gallery-header\.is-compact/);
+assert.match(app, /header\.dataset\.state = state/);
 assert.match(app, /PREVIEW_ROTATION_MS = 6500/);
 assert.doesNotMatch(app, /setTimeout\(\(\) => navigate|scheduleAutoplay|initializeCarousel/);
 assert.ok(!html.includes("G-XXXXXXXX"), "No se debe inventar un ID de GA4");
