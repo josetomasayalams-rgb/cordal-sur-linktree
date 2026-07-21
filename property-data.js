@@ -7,7 +7,7 @@
     Object.freeze({ id: "comedor", titleKey: "gallery.comedor", captionKey: "gallery.comedor.caption", slug: "03-comedor", count: 2 }),
     Object.freeze({ id: "habitacion1", titleKey: "gallery.habitacion1", captionKey: "gallery.habitacion1.caption", slug: "04-habitacion-1", count: 7 }),
     Object.freeze({ id: "habitacion2", titleKey: "gallery.habitacion2", captionKey: "gallery.habitacion2.caption", slug: "05-habitacion-2", count: 15 }),
-    Object.freeze({ id: "habitacion3", titleKey: "gallery.habitacion3", captionKey: "gallery.habitacion3.caption", slug: "06-habitacion-3", count: 5 }),
+    Object.freeze({ id: "habitacion3", titleKey: "gallery.habitacion3", captionKey: "gallery.habitacion3.caption", slug: "06-habitacion-3", count: 4, photoNumbers: Object.freeze([1, 2, 4, 5]) }),
     Object.freeze({ id: "bano1", titleKey: "gallery.bano1", captionKey: "gallery.bano1.caption", slug: "07-bano-completo-1", count: 2 }),
     Object.freeze({ id: "bano2", titleKey: "gallery.bano2", captionKey: "gallery.bano2.caption", slug: "08-bano-completo-2", count: 2 }),
     Object.freeze({ id: "balcon", titleKey: "gallery.balcon", captionKey: "gallery.balcon.caption", slug: "09-balcon", count: 1 }),
@@ -16,8 +16,8 @@
   ]);
 
   const photos = Object.freeze(groups.flatMap((group) =>
-    Array.from({ length: group.count }, (_, index) => {
-      const basename = `${group.slug}-${String(index + 1).padStart(2, "0")}`;
+    (group.photoNumbers || Array.from({ length: group.count }, (_, index) => index + 1)).map((photoNumber) => {
+      const basename = `${group.slug}-${String(photoNumber).padStart(2, "0")}`;
       return Object.freeze({
         id: basename,
         groupId: group.id,
@@ -34,8 +34,8 @@
   const previewOrder = Object.freeze(Array.from(
     { length: Math.max(...groups.map(({ count }) => count)) },
     (_, round) => groups
-      .filter(({ count }) => round < count)
-      .map(({ slug }) => `${slug}-${String(round + 1).padStart(2, "0")}`)
+      .map(({ id }) => photos.filter(({ groupId }) => groupId === id)[round]?.id)
+      .filter(Boolean)
   ).flat());
 
   const arrau = Object.freeze({

@@ -22,11 +22,12 @@ test("registers Arrau as a complete, future-ready property", () => {
   assert.equal(arrau.name, "Arrau");
   assert.equal(arrau.brand, "Cordal Sur");
   assert.equal(arrau.groups.length, 11);
-  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 47);
-  assert.equal(arrau.photos.length, 47);
-  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 47);
-  assert.equal(arrau.previewOrder.length, 47);
-  assert.equal(new Set(arrau.previewOrder).size, 47);
+  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 46);
+  assert.equal(arrau.photos.length, 46);
+  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 46);
+  assert.equal(arrau.previewOrder.length, 46);
+  assert.equal(new Set(arrau.previewOrder).size, 46);
+  assert.ok(!arrau.photos.some(({ id }) => id === "06-habitacion-3-03"));
   assert.deepEqual(Array.from(arrau.previewOrder.slice(0, 5)), [
     "01-sala-01",
     "02-cocina-completa-01",
@@ -86,4 +87,10 @@ test("supports mobile zoom, pan and filtered counters", () => {
   assert.match(appSource, /pointerGesture\?\.type === "pinch"/);
   assert.match(appSource, /indexes\.indexOf\(currentIndex\) \+ 1/);
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+grid-template-rows: auto auto minmax\(240px, 1fr\) auto auto/s);
+});
+
+test("keeps the mobile refresh control aligned and removes the pull-down skip label", () => {
+  assert.match(styles, /\.editorial-preview > \.preview-refresh\.glass-surface[^}]+position: absolute/s);
+  assert.match(styles, /overscroll-behavior-y: none/);
+  assert.doesNotMatch(html, /skip-link|Ir al contenido principal/);
 });

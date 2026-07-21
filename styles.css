@@ -31,6 +31,7 @@ html[data-theme="dark"] { color-scheme: dark; }
 }
 html {
   background: var(--forest);
+  overscroll-behavior-y: none;
   scroll-behavior: smooth;
 }
 body {
@@ -44,6 +45,7 @@ body {
   font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
 }
 img { display: block; max-width: 100%; }
@@ -58,25 +60,6 @@ a { color: inherit; }
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important; border: 0 !important;
 }
-.skip-link {
-  position: fixed;
-  z-index: 100;
-  top: 12px;
-  left: 12px;
-  min-height: 48px;
-  display: grid;
-  place-items: center;
-  padding: 10px 16px;
-  color: var(--ivory);
-  background: var(--forest);
-  border: 2px solid var(--gold);
-  border-radius: 14px;
-  font-weight: 800;
-  text-decoration: none;
-  transform: translateY(-150%);
-  transition: transform .2s ease;
-}
-.skip-link:focus { transform: translateY(0); }
 .brand-backdrop {
   position: fixed;
   z-index: -1;
@@ -290,7 +273,7 @@ a { color: inherit; }
   font-weight: 800;
   text-align: left;
 }
-.preview-refresh {
+.editorial-preview > .preview-refresh.glass-surface {
   position: absolute;
   z-index: 3;
   top: 12px;
@@ -308,7 +291,9 @@ a { color: inherit; }
   font: inherit;
   font-size: 1.2rem;
   font-weight: 800;
+  line-height: 1;
 }
+.preview-refresh span { transform: translateY(-1px); }
 .primary-action { padding: 18px 0 12px; }
 .whatsapp-card {
   min-height: 132px;
