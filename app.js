@@ -480,23 +480,26 @@ function initializeGallery() {
   let imageObserver;
   let headerFrame = 0;
   let scrollAnimationFrame = 0;
-  let currentHeaderGroupId = null;
+  let currentHeaderKey = "";
   const galleryReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
-  const renderHeaderGroup = (groupId, force = false) => {
+  const renderHeaderPosition = (groupId, photoIndex = null, force = false) => {
     const group = PHOTO_GROUPS.find(({ id }) => id === groupId);
-    const nextGroupId = group?.id || null;
-    if (!force && nextGroupId === currentHeaderGroupId) return;
-    currentHeaderGroupId = nextGroupId;
+    const current = group ? Math.max(1, Math.min(photoIndex || 1, group.count)) : null;
+    const nextKey = group ? `${group.id}:${current}` : "property";
+    if (!force && nextKey === currentHeaderKey) return;
+    currentHeaderKey = nextKey;
     const name = group ? t(group.titleKey) : ACTIVE_PROPERTY.name;
-    const count = group ? group.count : GALLERY_PHOTOS.length;
+    const total = group ? group.count : GALLERY_PHOTOS.length;
     headerTitle.textContent = name;
     headerDescription.textContent = group ? t(group.captionKey) : t("gallery.description");
-    counter.textContent = String(count);
+    counter.textContent = group ? t("gallery.counter", { current, total }) : String(total);
     counter.setAttribute("aria-label", group
-      ? t("gallery.group.count", { name, count })
-      : t("gallery.open", { count }));
+      ? t("gallery.thumbnail.aria", { current, total, description: name })
+      : t("gallery.open", { count: total }));
     header.dataset.group = group?.id || "property";
+    if (group) header.dataset.photoIndex = String(current);
+    else delete header.dataset.photoIndex;
     if (!force && !galleryReducedMotion?.matches) {
       [headerTitle, counter].forEach((element) => element.animate?.(
         [{ opacity: .48, transform: "translateY(2px)" }, { opacity: 1, transform: "translateY(0)" }],
@@ -504,22 +507,30 @@ function initializeGallery() {
       ));
     }
   };
-  const visibleGroupId = () => {
-    const anchor = header.getBoundingClientRect().bottom + 10;
-    let groupId = null;
+  const visiblePhotoPosition = () => {
+    const scrollRect = scrollArea.getBoundingClientRect();
+    const visibleTop = Math.max(scrollRect.top, header.getBoundingClientRect().bottom + 8);
+    const visibleBottom = scrollRect.bottom;
+    let bestMatch = null;
     tour.querySelectorAll("[data-gallery-section]").forEach((section) => {
-      if (section.getBoundingClientRect().top <= anchor) groupId = section.dataset.gallerySection;
+      section.querySelectorAll(".gallery-photo-card").forEach((card, index) => {
+        const rect = card.getBoundingClientRect();
+        const visibleHeight = Math.max(0, Math.min(rect.bottom, visibleBottom) - Math.max(rect.top, visibleTop));
+        if (!bestMatch || visibleHeight > bestMatch.visibleHeight) {
+          bestMatch = { groupId: section.dataset.gallerySection, photoIndex: index + 1, visibleHeight };
+        }
+      });
     });
-    return groupId;
+    return bestMatch?.visibleHeight > 0 ? bestMatch : null;
   };
   const syncHeaderState = () => {
     headerFrame = 0;
     const state = scrollArea.scrollTop > 24 ? "compact" : "expanded";
     header.classList.toggle("is-compact", state === "compact");
     header.dataset.state = state;
-    const groupId = state === "compact" ? visibleGroupId() : null;
-    renderHeaderGroup(groupId);
-    if (groupId) setActiveGroup(groupId);
+    const position = state === "compact" ? visiblePhotoPosition() : null;
+    renderHeaderPosition(position?.groupId, position?.photoIndex);
+    if (position?.groupId) setActiveGroup(position.groupId);
   };
   const scheduleHeaderSync = () => {
     if (headerFrame) return;
@@ -660,7 +671,7 @@ function initializeGallery() {
     }
   };
   const render = () => {
-    renderHeaderGroup(null, true);
+    renderHeaderPosition(null, null, true);
     renderNavigation();
     renderTour();
   };
@@ -669,7 +680,7 @@ function initializeGallery() {
     cancelScrollAnimation();
     header.classList.remove("is-compact");
     header.dataset.state = "expanded";
-    renderHeaderGroup(null, true);
+    renderHeaderPosition(null, null, true);
     document.body.classList.remove("gallery-open");
     if (dialog.open) dialog.close();
     else dialog.removeAttribute("open");

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es-CL" data-theme="dark" data-language="es">
+<html lang="es-CL" data-theme="dark" data-language="es" data-build="gallery-photo-counter-20260721">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,13 +31,13 @@
       document.documentElement.dataset.theme = "dark";
     }
   </script>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="glass.css">
-  <script src="preferences.js" defer></script>
-  <script src="property-data.js" defer></script>
-  <script src="availability.js" defer></script>
-  <script src="app.js" defer></script>
-  <script src="glass.js" defer></script>
+  <link rel="stylesheet" href="styles.css?v=gallery-photo-counter-20260721">
+  <link rel="stylesheet" href="glass.css?v=gallery-photo-counter-20260721">
+  <script src="preferences.js?v=gallery-photo-counter-20260721" defer></script>
+  <script src="property-data.js?v=gallery-photo-counter-20260721" defer></script>
+  <script src="availability.js?v=gallery-photo-counter-20260721" defer></script>
+  <script src="app.js?v=gallery-photo-counter-20260721" defer></script>
+  <script src="glass.js?v=gallery-photo-counter-20260721" defer></script>
 </head>
 <body>
   <div class="brand-backdrop" aria-hidden="true">
@@ -200,11 +200,8 @@
   <dialog class="gallery-dialog" id="gallery-dialog" aria-labelledby="gallery-title" aria-describedby="gallery-description">
     <div class="gallery-dialog-inner">
       <header class="gallery-header">
-        <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">
-          <span class="gallery-close-lockup" aria-hidden="true">
-            <span class="gallery-close-symbol"></span>
-            <span class="gallery-close-arrow">←</span>
-          </span>
+        <button class="gallery-close" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">
+          <span class="gallery-close-symbol" aria-hidden="true"></span>
         </button>
         <div>
           <p class="eyebrow" data-i18n="gallery.kicker">Colección fotográfica</p>

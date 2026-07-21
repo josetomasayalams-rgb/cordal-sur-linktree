@@ -38,6 +38,8 @@ assert.match(html, /Explorar 35 fotos/);
 assert.match(html, /id="gallery-tour"/);
 assert.match(html, /id="gallery-scroll"/);
 assert.match(html, /class="gallery-close-symbol"/);
+assert.doesNotMatch(html, /gallery-close-arrow|gallery-close-lockup/);
+assert.match(html, /data-build="gallery-photo-counter-20260721"/);
 assert.match(html, /assets\/photos\/01-sala-02\.webp/);
 assert.doesNotMatch(html, /hero-layer-a|carousel-toggle|photo-viewer|1\/13/);
 
@@ -73,6 +75,7 @@ assert.match(styles, /--brand-title-gradient: linear-gradient\(110deg, #102c26, 
 assert.match(styles, /\.gallery-header\.is-compact/);
 assert.match(app, /header\.dataset\.state = state/);
 assert.match(app, /header\.dataset\.group = group\?\.id \|\| "property"/);
+assert.match(app, /header\.dataset\.photoIndex = String\(current\)/);
 assert.match(app, /PREVIEW_ROTATION_MS = 6500/);
 assert.doesNotMatch(app, /setTimeout\(\(\) => navigate|scheduleAutoplay|initializeCarousel/);
 assert.ok(!html.includes("G-XXXXXXXX"), "No se debe inventar un ID de GA4");

@@ -98,9 +98,8 @@ test("keeps navigation and zoom chrome away from the photographs", () => {
 });
 
 test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tour", () => {
-  assert.match(html, /class="gallery-close-lockup"/);
-  assert.match(html, /class="gallery-close-symbol"/);
-  assert.match(html, /class="gallery-close-arrow">←<\/span>/);
+  assert.match(html, /<button class="gallery-close"[^>]*>[\s\S]*?<span class="gallery-close-symbol" aria-hidden="true"><\/span>[\s\S]*?<\/button>/);
+  assert.doesNotMatch(html, /gallery-close-lockup|gallery-close-arrow|gallery-close glass-interactive/);
   assert.match(styles, /\.gallery-close-symbol[^}]+cordal-sur-symbol-reverse\.svg/s);
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header[^}]+width: min\(calc\(100% - 24px\), 366px\)/s);
   assert.match(styles, /\.gallery-header\.is-compact[^}]+width: min\(calc\(100% - 24px\), 252px\)/s);
@@ -112,10 +111,11 @@ test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tou
   assert.match(appSource, /scrollArea\.scrollTop > 24 \? "compact" : "expanded"/);
   assert.match(appSource, /header\.classList\.toggle\("is-compact"/);
   assert.match(appSource, /scrollArea\.addEventListener\("scroll", scheduleHeaderSync, \{ passive: true \}\)/);
-  assert.match(appSource, /visibleGroupId/);
-  assert.match(appSource, /renderHeaderGroup\(groupId\)/);
-  assert.match(appSource, /counter\.textContent = String\(count\)/);
+  assert.match(appSource, /visiblePhotoPosition/);
+  assert.match(appSource, /renderHeaderPosition\(position\?\.groupId, position\?\.photoIndex\)/);
+  assert.match(appSource, /counter\.textContent = group \? t\("gallery\.counter", \{ current, total \}\) : String\(total\)/);
   assert.match(appSource, /header\.dataset\.group = group\?\.id \|\| "property"/);
+  assert.match(appSource, /header\.dataset\.photoIndex = String\(current\)/);
   assert.match(appSource, /const scrollToPosition = \(top\) =>/);
   assert.match(appSource, /Math\.min\(260, Math\.max\(150, Math\.abs\(distance\) \* \.035\)\)/);
   assert.match(appSource, /scrollArea\.addEventListener\("pointerdown", cancelScrollAnimation/);
@@ -127,9 +127,18 @@ test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tou
   assert.match(glassStyles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header \.gallery-close[\s\S]+background: transparent[^}]+border-color: transparent[^}]+box-shadow: none/s);
 });
 
-test("keeps room photos unnumbered in the visible tour", () => {
+test("shows photo position only in the island, never over the photographs", () => {
   assert.doesNotMatch(html, /<figcaption/);
   assert.doesNotMatch(appSource, /createElement\("figcaption"\)/);
+  assert.match(appSource, /t\("gallery\.counter", \{ current, total \}\)/);
+  assert.match(appSource, /t\("gallery\.thumbnail\.aria", \{ current, total, description: name \}\)/);
+});
+
+test("cache-busts every runtime asset with the published build id", () => {
+  assert.match(html, /data-build="gallery-photo-counter-20260721"/);
+  for (const resource of ["styles.css", "glass.css", "preferences.js", "property-data.js", "availability.js", "app.js", "glass.js"]) {
+    assert.ok(html.includes(`${resource}?v=gallery-photo-counter-20260721`), `Missing cache version for ${resource}`);
+  }
 });
 
 test("matches the Cordal Sur App title gradient in both themes", () => {
