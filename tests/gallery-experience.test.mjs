@@ -144,9 +144,9 @@ test("shows photo position only in the island, never over the photographs", () =
 });
 
 test("cache-busts every runtime asset with the published build id", () => {
-  assert.match(html, /data-build="gallery-photo-counter-20260721b"/);
+  assert.match(html, /data-build="minimum-two-night-stay-20260721"/);
   for (const resource of ["styles.css", "glass.css", "preferences.js", "property-data.js", "availability.js", "app.js", "glass.js"]) {
-    assert.ok(html.includes(`${resource}?v=gallery-photo-counter-20260721b`), `Missing cache version for ${resource}`);
+    assert.ok(html.includes(`${resource}?v=minimum-two-night-stay-20260721`), `Missing cache version for ${resource}`);
   }
 });
 

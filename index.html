@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es-CL" data-theme="dark" data-language="es" data-build="gallery-photo-counter-20260721b">
+<html lang="es-CL" data-theme="dark" data-language="es" data-build="minimum-two-night-stay-20260721">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,13 +31,13 @@
       document.documentElement.dataset.theme = "dark";
     }
   </script>
-  <link rel="stylesheet" href="styles.css?v=gallery-photo-counter-20260721b">
-  <link rel="stylesheet" href="glass.css?v=gallery-photo-counter-20260721b">
-  <script src="preferences.js?v=gallery-photo-counter-20260721b" defer></script>
-  <script src="property-data.js?v=gallery-photo-counter-20260721b" defer></script>
-  <script src="availability.js?v=gallery-photo-counter-20260721b" defer></script>
-  <script src="app.js?v=gallery-photo-counter-20260721b" defer></script>
-  <script src="glass.js?v=gallery-photo-counter-20260721b" defer></script>
+  <link rel="stylesheet" href="styles.css?v=minimum-two-night-stay-20260721">
+  <link rel="stylesheet" href="glass.css?v=minimum-two-night-stay-20260721">
+  <script src="preferences.js?v=minimum-two-night-stay-20260721" defer></script>
+  <script src="property-data.js?v=minimum-two-night-stay-20260721" defer></script>
+  <script src="availability.js?v=minimum-two-night-stay-20260721" defer></script>
+  <script src="app.js?v=minimum-two-night-stay-20260721" defer></script>
+  <script src="glass.js?v=minimum-two-night-stay-20260721" defer></script>
 </head>
 <body>
   <div class="brand-backdrop" aria-hidden="true">
@@ -105,7 +105,8 @@
           <div>
             <p class="eyebrow" data-i18n="availability.eyebrow">Disponibilidad</p>
             <h2 id="availability-title" data-i18n="availability.title">Encuentra tus fechas</h2>
-            <p data-i18n="availability.description">Consulta la disponibilidad consolidada de nuestros calendarios de reserva.</p>
+            <p class="availability-description" data-i18n="availability.description">Selecciona un mínimo de 2 noches y conoce el valor estimado de tu estadía.</p>
+            <p class="availability-minimum-stay" data-i18n="availability.minimumStay">Estadía mínima: 2 noches</p>
           </div>
           <button class="availability-refresh glass-interactive" id="availability-refresh" type="button" data-i18n-aria="availability.refresh" aria-label="Actualizar disponibilidad">
             <span aria-hidden="true">↻</span>
@@ -127,7 +128,7 @@
 
         <div class="availability-selection" id="availability-selection" hidden>
           <div class="availability-selection-heading">
-            <p><span class="availability-check" aria-hidden="true">✓</span> <strong id="availability-selection-title" data-i18n="availability.dateSelected">Noche seleccionada</strong></p>
+            <p><span class="availability-check" aria-hidden="true">✓</span> <strong id="availability-selection-title" data-i18n="availability.dateSelected">Llegada seleccionada</strong></p>
             <button id="availability-clear" type="button" data-i18n="availability.clear">Borrar selección</button>
           </div>
           <dl class="availability-dates">
@@ -138,13 +139,13 @@
           <button class="availability-reveal-price" id="availability-reveal-price" type="button" aria-controls="availability-quote" aria-expanded="false">
             <span>
               <strong data-i18n="availability.revealPrices">Revelar precios</strong>
-              <small data-i18n="availability.revealPrices.detail">Muestra el valor de la noche seleccionada o el total de tu estadía.</small>
+              <small data-i18n="availability.revealPrices.detail">Muestra el desglose y el total estimado de tu estadía.</small>
             </span>
             <span aria-hidden="true">→</span>
           </button>
-          <div class="availability-quote" id="availability-quote" role="region" aria-labelledby="availability-quote-label" aria-live="polite" hidden>
+          <div class="availability-quote" id="availability-quote" role="region" aria-labelledby="availability-quote-label" aria-live="polite" tabindex="-1" hidden>
             <ol id="availability-price-breakdown"></ol>
-            <p><span id="availability-quote-label" data-i18n="availability.nightlyPrice">Precio por noche</span> <strong id="availability-subtotal">—</strong></p>
+            <p><span id="availability-quote-label" data-i18n="availability.estimate">Subtotal estimado</span> <strong id="availability-subtotal">—</strong></p>
           </div>
           <a class="availability-consult glass-surface glass-tinted glass-interactive" id="availability-consult" target="_blank" rel="noopener noreferrer" hidden>
             <span data-i18n="availability.consult">Consultar estas fechas por WhatsApp</span>

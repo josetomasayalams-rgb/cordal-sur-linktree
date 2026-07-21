@@ -11,6 +11,7 @@
     timezone: "America/Santiago",
     weekdayRateClp: 260000,
     weekendRateClp: 280000,
+    minimumNights: 2,
     bookingEndExclusive: "2026-10-01",
     monthsAhead: 12,
     timeoutMs: 8000,
@@ -87,6 +88,35 @@
     return eachNight(arrival, departure).some((date) => isBlocked(date, blockedRanges));
   }
 
+  function meetsMinimumStay(arrival, departure) {
+    return eachNight(arrival, departure).length >= CONFIG.minimumNights;
+  }
+
+  function isBookableStay(arrival, departure, range, blockedRanges) {
+    return Boolean(
+      parseIsoDate(arrival)
+      && parseIsoDate(departure)
+      && range
+      && arrival >= range.from
+      && arrival < range.to
+      && departure <= range.to
+      && meetsMinimumStay(arrival, departure)
+      && !rangeHasBlockedNight(arrival, departure, blockedRanges)
+    );
+  }
+
+  function canStartStay(date, range, blockedRanges) {
+    const departure = shiftDays(date, CONFIG.minimumNights);
+    return isBookableStay(date, departure, range, blockedRanges);
+  }
+
+  function isSelectionValid(arrival, departure, range, blockedRanges) {
+    if (!arrival) return true;
+    return departure
+      ? isBookableStay(arrival, departure, range, blockedRanges)
+      : canStartStay(arrival, range, blockedRanges);
+  }
+
   function nightlyRate(date) {
     const day = parseIsoDate(date)?.getUTCDay();
     return day === 5 || day === 6 ? CONFIG.weekendRateClp : CONFIG.weekdayRateClp;
@@ -142,6 +172,7 @@
   }
 
   function buildWhatsappMessage(arrival, departure, includePrice) {
+    if (!meetsMinimumStay(arrival, departure)) throw new RangeError("Minimum stay is two nights");
     const quote = quoteRange(arrival, departure);
     const price = includePrice ? t("availability.whatsapp.price", { total: formatMoney(quote.totalClp) }) : "";
     return t("availability.whatsapp", {
@@ -218,7 +249,14 @@
     const activeRange = () => state.payload ? clampBookableRange(state.payload.range) : fallbackRange;
     const blockedRanges = () => state.payload?.blockedRanges || [];
     const availableForSelection = () => state.payload && state.mode !== "unavailable";
-    const lastMonth = () => monthStart(shiftDays(activeRange().to, -1));
+    const includesBoundaryCheckout = () => Boolean(
+      state.arrival
+      && (
+        state.departure === activeRange().to
+        || (!state.departure && isBookableStay(state.arrival, activeRange().to, activeRange(), blockedRanges()))
+      )
+    );
+    const lastMonth = () => monthStart(includesBoundaryCheckout() ? activeRange().to : shiftDays(activeRange().to, -1));
     const maxViewMonth = () => shiftMonths(lastMonth(), -(visibleMonthCount() - 1));
 
     function announce(key, values) {
@@ -255,7 +293,21 @@
     }
 
     function canBeCheckout(date) {
-      return Boolean(state.arrival && !state.departure && date > state.arrival && !rangeHasBlockedNight(state.arrival, date, blockedRanges()));
+      return Boolean(
+        state.arrival
+        && !state.departure
+        && isBookableStay(state.arrival, date, activeRange(), blockedRanges())
+      );
+    }
+
+    function canStartMinimumStay(date) {
+      return canStartStay(date, activeRange(), blockedRanges());
+    }
+
+    function selectionIsValid() {
+      if (!state.arrival) return true;
+      if (!availableForSelection()) return false;
+      return isSelectionValid(state.arrival, state.departure, activeRange(), blockedRanges());
     }
 
     function isSelected(date) {
@@ -268,8 +320,12 @@
       const labels = [fullDateLabel(date)];
       if (flags.today) labels.push(t("availability.today"));
       if (flags.past) labels.push(t("availability.past"));
+      else if (flags.outside) labels.push(t("availability.outsideRange"));
+      else if (flags.minimumArrival) labels.push(t("availability.minimumStay.arrivalUnavailable"));
+      else if (flags.minimumStay) labels.push(t("availability.minimumStay.checkout"));
       else if (flags.blocked && flags.checkout) labels.push(t("availability.reserved.checkout"));
       else if (flags.blocked) labels.push(t("availability.reserved"));
+      else if (flags.boundaryCheckout) labels.push(t("availability.checkoutOnly"));
       else if (flags.unknown) labels.push(t("availability.unavailable"));
       else labels.push(t("availability.available"));
       if (flags.selected) labels.push(t("availability.selected"));
@@ -309,14 +365,18 @@
       for (let day = 1; day <= daysInMonth; day += 1) {
         const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const past = date < activeRange().from;
-        const outside = date >= activeRange().to;
+        const boundaryCheckout = date === activeRange().to && (canBeCheckout(date) || state.departure === date);
+        const outside = date > activeRange().to || (date === activeRange().to && !boundaryCheckout);
         const blocked = isBlocked(date, blockedRanges());
         const checkout = blocked && canBeCheckout(date);
+        const minimumStay = Boolean(state.arrival && !state.departure && date > state.arrival && !meetsMinimumStay(state.arrival, date));
         const unknown = !availableForSelection();
+        const choosingArrival = !state.arrival || Boolean(state.departure);
         const selected = isSelected(date);
+        const minimumArrival = Boolean(choosingArrival && !selected && !past && !outside && !blocked && !unknown && !canStartMinimumStay(date));
         const todayFlag = date === today;
         const disabled = past || outside || unknown;
-        const ariaDisabled = disabled || (blocked && !checkout);
+        const ariaDisabled = disabled || minimumStay || minimumArrival || (blocked && !checkout);
 
         const cell = document.createElement("span");
         cell.className = "availability-day-cell";
@@ -335,16 +395,29 @@
           date === state.arrival ? "is-arrival" : "",
           date === state.departure ? "is-departure" : "",
           todayFlag ? "is-today" : "",
-          checkout ? "is-checkout-option" : "",
+          checkout || boundaryCheckout ? "is-checkout-option" : "",
+          minimumStay || minimumArrival ? "is-minimum-stay" : "",
         ].filter(Boolean).join(" ");
-        button.setAttribute("aria-label", dayAriaLabel(date, { past, blocked, checkout, unknown, selected, today: todayFlag }));
+        button.setAttribute("aria-label", dayAriaLabel(date, { past, outside, blocked, checkout, boundaryCheckout, minimumStay, minimumArrival, unknown, selected, today: todayFlag }));
         button.setAttribute("aria-disabled", String(ariaDisabled));
         button.setAttribute("aria-pressed", String(selected));
+        if (minimumArrival) button.dataset.minimumStay = "arrival";
+        else if (minimumStay) button.dataset.minimumStay = "checkout";
         const number = document.createElement("time");
         number.dateTime = date;
         number.textContent = String(day);
         const status = document.createElement("small");
-        status.textContent = blocked ? t("availability.reserved") : unknown ? "—" : t("availability.available");
+        status.textContent = minimumStay || minimumArrival
+          ? t("availability.minimumStay.short")
+          : boundaryCheckout
+            ? t("availability.departure")
+            : outside
+              ? "—"
+              : blocked
+                ? t("availability.reserved")
+                : unknown
+                  ? "—"
+                  : t("availability.available");
         button.append(number, status);
         cell.append(button);
         grid.append(cell);
@@ -380,18 +453,27 @@
       const complete = Boolean(state.arrival && state.departure);
       const selected = Boolean(state.arrival);
       elements.selection.hidden = !selected;
-      if (!selected) return;
-      const quote = quoteRange(state.arrival, complete ? state.departure : shiftDays(state.arrival, 1));
+      if (!selected) {
+        elements.revealPrice.hidden = true;
+        elements.revealPrice.setAttribute("aria-expanded", "false");
+        elements.quote.hidden = true;
+        elements.consult.hidden = true;
+        elements.breakdown.replaceChildren();
+        elements.subtotal.textContent = "—";
+        elements.consult.removeAttribute("href");
+        return;
+      }
+      const quote = complete ? quoteRange(state.arrival, state.departure) : null;
       elements.selectionTitle.textContent = t(complete ? "availability.confirmed" : "availability.dateSelected");
       elements.arrival.textContent = formatDate(state.arrival);
       elements.departure.textContent = complete ? formatDate(state.departure) : t("availability.chooseDeparture");
       elements.nightCount.textContent = complete ? nightCountLabel(quote.nights) : "—";
-      elements.revealPrice.hidden = state.pricesRevealed;
+      elements.revealPrice.hidden = !complete || state.pricesRevealed;
       elements.revealPrice.setAttribute("aria-expanded", String(state.pricesRevealed));
-      elements.quote.hidden = !state.pricesRevealed;
+      elements.quote.hidden = !complete || !state.pricesRevealed;
       elements.consult.hidden = !complete || !state.pricesRevealed;
 
-      if (!state.pricesRevealed) {
+      if (!complete || !state.pricesRevealed) {
         elements.breakdown.replaceChildren();
         elements.subtotal.textContent = "—";
         elements.consult.removeAttribute("href");
@@ -407,9 +489,9 @@
         item.append(copy, amount);
         return item;
       }));
-      elements.quoteLabel.textContent = t(complete ? "availability.estimate" : "availability.nightlyPrice");
+      elements.quoteLabel.textContent = t("availability.estimate");
       elements.subtotal.textContent = formatMoney(quote.totalClp);
-      if (complete) elements.consult.href = whatsappHref(state.arrival, state.departure, true);
+      elements.consult.href = whatsappHref(state.arrival, state.departure, true);
     }
 
     function render() {
@@ -418,24 +500,44 @@
       renderSelection();
     }
 
-    function resetSelection(announceReset = true) {
+    function restoreCalendarFocus(date) {
+      window.requestAnimationFrame(() => {
+        elements.months.querySelector(`button[data-date="${date}"]:not(:disabled)`)?.focus({ preventScroll: true });
+      });
+    }
+
+    function clearSelectionState() {
       state.arrival = null;
       state.departure = null;
       state.pricesRevealed = false;
+    }
+
+    function resetSelection(announceReset = true) {
+      clearSelectionState();
+      if (state.viewMonth > maxViewMonth()) state.viewMonth = maxViewMonth();
       if (announceReset) announce("availability.selectArrival");
       render();
     }
 
-    function selectDate(date) {
+    function selectDate(date, restoreFocus = false) {
       if (!availableForSelection()) return;
       if (!state.arrival || state.departure || date <= state.arrival) {
         if (isBlocked(date, blockedRanges())) return;
+        if (!canStartMinimumStay(date)) {
+          announce("availability.minimumStay.arrival");
+          return;
+        }
         state.arrival = date;
         state.departure = null;
         state.pricesRevealed = false;
         state.focusDate = date;
         announce("availability.selectDeparture");
         render();
+        if (restoreFocus) restoreCalendarFocus(date);
+        return;
+      }
+      if (!meetsMinimumStay(state.arrival, date)) {
+        announce("availability.minimumStay.error");
         return;
       }
       if (rangeHasBlockedNight(state.arrival, date, blockedRanges())) {
@@ -446,6 +548,7 @@
       state.focusDate = date;
       announce("availability.confirmed");
       render();
+      if (restoreFocus) restoreCalendarFocus(date);
     }
 
     function ensureVisibleAndFocus(date) {
@@ -489,10 +592,23 @@
         const payload = await requestAvailability();
         state.payload = payload;
         state.mode = payload.status;
+        const invalidatedSelection = Boolean(state.arrival && !selectionIsValid());
+        if (payload.status === "unavailable" || invalidatedSelection) clearSelectionState();
         if (state.viewMonth < monthStart(activeRange().from)) state.viewMonth = monthStart(activeRange().from);
         if (state.viewMonth > maxViewMonth()) state.viewMonth = maxViewMonth();
-        if (payload.status === "unavailable") resetSelection(false);
-        announce(payload.status === "unavailable" ? "availability.unavailable" : payload.status === "stale" ? "availability.stale" : "availability.selectArrival");
+        announce(
+          payload.status === "unavailable"
+            ? "availability.unavailable"
+            : invalidatedSelection
+              ? "availability.selectionInvalidated"
+              : payload.status === "stale"
+                ? "availability.stale"
+                : state.departure
+                  ? "availability.confirmed"
+                  : state.arrival
+                    ? "availability.selectDeparture"
+                    : "availability.selectArrival"
+        );
       } catch {
         state.mode = state.payload ? (navigator.onLine ? "stale" : "offline") : "unavailable";
         if (!state.payload) resetSelection(false);
@@ -505,13 +621,27 @@
 
     elements.months.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-date]");
-      if (button && !button.disabled && button.getAttribute("aria-disabled") !== "true") selectDate(button.dataset.date);
+      if (!button || button.disabled) return;
+      if (button.dataset.minimumStay) {
+        announce(button.dataset.minimumStay === "arrival" ? "availability.minimumStay.arrival" : "availability.minimumStay.error");
+        return;
+      }
+      if (button.getAttribute("aria-disabled") !== "true") selectDate(button.dataset.date, button === document.activeElement);
     });
     elements.months.addEventListener("keydown", (event) => {
       const button = event.target.closest("button[data-date]");
       if (!button) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (button.dataset.minimumStay) {
+          announce(button.dataset.minimumStay === "arrival" ? "availability.minimumStay.arrival" : "availability.minimumStay.error");
+        } else if (button.getAttribute("aria-disabled") !== "true") {
+          selectDate(button.dataset.date, true);
+        }
+        return;
+      }
       const target = keyboardTarget(button.dataset.date, event.key);
-      if (!target || target < activeRange().from || target >= activeRange().to) return;
+      if (!target || target < activeRange().from || target > activeRange().to || (target === activeRange().to && !canBeCheckout(target))) return;
       event.preventDefault();
       ensureVisibleAndFocus(target);
     });
@@ -524,11 +654,17 @@
       renderCalendar();
     });
     elements.refresh.addEventListener("click", load);
-    elements.clear.addEventListener("click", () => resetSelection());
+    elements.clear.addEventListener("click", () => {
+      const focusDate = state.arrival;
+      state.focusDate = focusDate || state.focusDate;
+      resetSelection();
+      if (focusDate) ensureVisibleAndFocus(focusDate);
+    });
     elements.revealPrice.addEventListener("click", () => {
-      if (!state.arrival || state.pricesRevealed) return;
+      if (!state.arrival || !state.departure || !meetsMinimumStay(state.arrival, state.departure) || state.pricesRevealed) return;
       state.pricesRevealed = true;
       renderSelection();
+      window.requestAnimationFrame(() => elements.quote.focus({ preventScroll: true }));
       announce("availability.pricesRevealed");
     });
     window.addEventListener("online", load);
@@ -555,6 +691,10 @@
     eachNight,
     isBlocked,
     rangeHasBlockedNight,
+    meetsMinimumStay,
+    isBookableStay,
+    canStartStay,
+    isSelectionValid,
     nightlyRate,
     quoteRange,
     clampBookableRange,
