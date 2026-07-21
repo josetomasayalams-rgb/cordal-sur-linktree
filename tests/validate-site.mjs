@@ -46,7 +46,7 @@ assert.match(robots, /Sitemap: https:\/\/josetomasayalams-rgb\.github\.io\/corda
 assert.match(sitemap, /<loc>https:\/\/josetomasayalams-rgb\.github\.io\/cordal-sur-linktree\/<\/loc>/);
 assert.match(sitemap, /<lastmod>2026-07-21<\/lastmod>/);
 
-for (const destination of ["whatsapp", "airbnb", "booking", "finance", "share"]) {
+for (const destination of ["whatsapp", "airbnb", "booking", "share"]) {
   assert.ok(tracking.includes('return "' + destination + '"'), "Falta clasificación " + destination);
 }
 assert.ok(tracking.includes('"click_" + destination'), "Falta contrato click_*");

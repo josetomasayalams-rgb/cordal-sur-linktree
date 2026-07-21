@@ -47,11 +47,6 @@ const BRAND_ASSETS = Object.freeze({
     type: "glyph",
     treatment: "mask"
   }),
-  finance: Object.freeze({
-    src: "assets/brand/cordal-sur-symbol-reverse.svg",
-    type: "glyph",
-    treatment: "mask"
-  }),
   snowForecast: Object.freeze({
     src: "assets/brands/snow-forecast-wordmark.png",
     type: "wordmark",
@@ -116,14 +111,6 @@ const LINKS = Object.freeze([
     url: "https://www.instagram.com/cordal_sur/"
   }),
   Object.freeze({
-    id: "finance",
-    group: "platform",
-    labelKey: "link.finance.label",
-    detailKey: "link.finance.detail",
-    brandKey: "finance",
-    url: "https://cordal-sur-finanzas.jayala2407.chatgpt.site"
-  }),
-  Object.freeze({
     id: "forecast",
     group: "travel",
     labelKey: "link.forecast.label",
@@ -154,7 +141,7 @@ Object.assign(window, { LINKS, BRAND_ASSETS, PROPERTIES, ACTIVE_PROPERTY, PREVIE
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
   "www.snow-forecast.com", "www.nevadosdechillan.com", "www.google.com",
-  "link.mercadopago.cl", "cordal-sur-finanzas.jayala2407.chatgpt.site"
+  "link.mercadopago.cl"
 ]);
 
 function safeHref(value) {
@@ -247,13 +234,6 @@ function renderLinks(container, links, type) {
 
     const brandStage = createBrandStage(link.brandKey, type);
     if (brandStage) anchor.append(brandStage);
-
-    if (type === "platform" && link.id === "finance") {
-      const platformLabel = document.createElement("span");
-      platformLabel.className = "platform-label";
-      platformLabel.textContent = labelText;
-      anchor.append(platformLabel);
-    }
 
     if (type !== "platform") {
       const copy = document.createElement("span");
