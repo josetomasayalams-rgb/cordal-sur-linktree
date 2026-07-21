@@ -25,13 +25,16 @@ test("registers Arrau as a complete, future-ready property", () => {
   assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 47);
   assert.equal(arrau.photos.length, 47);
   assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 47);
-  assert.deepEqual(Array.from(arrau.featured, ({ id }) => id), [
-    "01-sala-02",
-    "02-cocina-completa-04",
+  assert.equal(arrau.previewOrder.length, 47);
+  assert.equal(new Set(arrau.previewOrder).size, 47);
+  assert.deepEqual(Array.from(arrau.previewOrder.slice(0, 5)), [
+    "01-sala-01",
+    "02-cocina-completa-01",
+    "03-comedor-01",
     "04-habitacion-1-01",
     "05-habitacion-2-01",
-    "10-exterior-03",
   ]);
+  assert.deepEqual(new Set(arrau.previewOrder), new Set(arrau.photos.map(({ id }) => id)));
 
   for (const photo of arrau.photos) {
     assert.ok(fs.existsSync(new URL(`../${photo.src}`, import.meta.url)), `Missing original ${photo.src}`);
@@ -41,14 +44,18 @@ test("registers Arrau as a complete, future-ready property", () => {
   }
 });
 
-test("uses a single immersive gallery without autoplay or a nested viewer", () => {
+test("uses a single immersive gallery with a rotating cover and no nested viewer", () => {
   assert.equal((html.match(/<dialog\b/g) || []).length, 2, "Only gallery and payment dialogs should remain");
   assert.match(html, /id="gallery-filters"/);
   assert.match(html, /id="gallery-main-image"/);
   assert.match(html, /id="gallery-thumbnails"/);
   assert.match(html, /aria-controls="gallery-dialog"/);
   assert.doesNotMatch(html, /photo-viewer|carousel-toggle|carousel-controls|hero-layer/);
-  assert.doesNotMatch(appSource, /initializeCarousel|scheduleAutoplay|autoplayTimer|6000/);
+  assert.doesNotMatch(appSource, /initializeCarousel|scheduleAutoplay|autoplayTimer/);
+  assert.match(appSource, /PREVIEW_ROTATION_MS = 6500/);
+  assert.match(appSource, /visiblePhotos/);
+  assert.match(appSource, /data-preview-refresh/);
+  assert.match(appSource, /index === 0 \? photo\.src : photo\.thumbnail/);
   assert.match(appSource, /event\.key === "ArrowLeft"/);
   assert.match(appSource, /event\.key === "ArrowRight"/);
   assert.match(appSource, /event\.key === "Home"/);
@@ -62,9 +69,21 @@ test("uses a single immersive gallery without autoplay or a nested viewer", () =
 
 test("keeps portrait photos complete and the preview responsive", () => {
   assert.match(styles, /\.gallery-main-image[^}]+object-fit: contain/s);
+  assert.match(styles, /\.gallery-main-image[^}]+min-height: 0/s);
+  assert.match(styles, /\.gallery-image-viewport[^}]+touch-action: none/s);
   assert.match(styles, /\.gallery-ambient[^}]+filter: blur/s);
-  assert.match(styles, /touch-action: pan-y pinch-zoom/);
   assert.match(styles, /\.preview-filmstrip[^}]+overflow-x: auto/s);
   assert.match(styles, /@media \(min-width: 640px\)[\s\S]+\.editorial-preview[^}]+grid-template-columns/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("supports mobile zoom, pan and filtered counters", () => {
+  for (const id of ["gallery-image-viewport", "gallery-zoom-out", "gallery-zoom-reset", "gallery-zoom-in"]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(appSource, /applyZoom/);
+  assert.match(appSource, /pointerDistance/);
+  assert.match(appSource, /pointerGesture\?\.type === "pinch"/);
+  assert.match(appSource, /indexes\.indexOf\(currentIndex\) \+ 1/);
+  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+grid-template-rows: auto auto minmax\(240px, 1fr\) auto auto/s);
 });

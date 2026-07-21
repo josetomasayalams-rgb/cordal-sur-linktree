@@ -59,10 +59,12 @@ assert.doesNotMatch(propertyData, /10-piscina|11-entorno/, "La galería no debe 
 assert.equal(galleryWindow.CS_LINKTREE_PROPERTIES.length, 1, "Arrau debe ser la primera propiedad del portafolio");
 assert.equal(galleryWindow.ACTIVE_PROPERTY.id, "arrau");
 assert.equal(galleryWindow.GALLERY_PHOTOS.length, 47, "La aplicación debe exponer las 47 fotos finales");
-assert.equal(galleryWindow.FEATURED_PHOTOS.length, 5, "La portada editorial debe tener cinco fotografías");
-assert.equal(galleryWindow.FEATURED_PHOTOS[0].src, "assets/photos/01-sala-02.webp");
+assert.equal(galleryWindow.PREVIEW_PHOTOS.length, 47, "La portada dinámica debe recorrer las 47 fotografías");
+assert.equal(new Set(galleryWindow.PREVIEW_PHOTOS.map(({ id }) => id)).size, 47, "La portada no debe repetir fotos en su ciclo");
+assert.equal(galleryWindow.PREVIEW_PHOTOS[0].src, "assets/photos/01-sala-01.webp");
 assert.ok(styles.includes(".gallery-dialog"), "Faltan estilos de galería");
 assert.match(styles, /object-fit: contain/);
+assert.match(app, /PREVIEW_ROTATION_MS = 6500/);
 assert.doesNotMatch(app, /setTimeout\(\(\) => navigate|scheduleAutoplay|initializeCarousel/);
 assert.ok(!html.includes("G-XXXXXXXX"), "No se debe inventar un ID de GA4");
 

@@ -13,10 +13,11 @@ const requestedPropertyId = (() => {
 const ACTIVE_PROPERTY = PROPERTIES.find(({ id }) => id === requestedPropertyId) || PROPERTIES[0];
 const PHOTO_GROUPS = ACTIVE_PROPERTY.groups;
 const GALLERY_PHOTOS = ACTIVE_PROPERTY.photos;
-const FEATURED_PHOTOS = Object.freeze(ACTIVE_PROPERTY.featured.map((featured) => Object.freeze({
-  ...GALLERY_PHOTOS.find(({ id }) => id === featured.id),
-  position: featured.position
-})));
+const PREVIEW_PHOTOS = Object.freeze(ACTIVE_PROPERTY.previewOrder.map((photoId) =>
+  GALLERY_PHOTOS.find(({ id }) => id === photoId)
+).filter(Boolean));
+const PREVIEW_WINDOW_SIZE = 5;
+const PREVIEW_ROTATION_MS = 6500;
 
 const BRAND_ASSETS = Object.freeze({
   whatsapp: Object.freeze({
@@ -135,7 +136,7 @@ const LINKS = Object.freeze([
   })
 ]);
 
-Object.assign(window, { LINKS, BRAND_ASSETS, PROPERTIES, ACTIVE_PROPERTY, FEATURED_PHOTOS, GALLERY_PHOTOS });
+Object.assign(window, { LINKS, BRAND_ASSETS, PROPERTIES, ACTIVE_PROPERTY, PREVIEW_PHOTOS, GALLERY_PHOTOS });
 
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
@@ -360,17 +361,26 @@ function initializePreview() {
   const label = document.querySelector("#gallery-trigger-label");
   if (!preview || !openButton || !label) return;
 
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const pageCount = Math.ceil(PREVIEW_PHOTOS.length / PREVIEW_WINDOW_SIZE);
+  let previewPage = Math.floor(Date.now() / PREVIEW_ROTATION_MS) % pageCount;
+  let rotationTimer = 0;
+  let interactionPaused = false;
+
   const updateButton = () => {
     const text = t("gallery.open", { count: GALLERY_PHOTOS.length });
     label.textContent = text;
     openButton.setAttribute("aria-label", text);
   };
+  const visiblePhotos = () => Array.from({ length: PREVIEW_WINDOW_SIZE }, (_, offset) =>
+    PREVIEW_PHOTOS[(previewPage * PREVIEW_WINDOW_SIZE + offset) % PREVIEW_PHOTOS.length]
+  );
   const render = () => {
     const featuredStage = document.createElement("div");
     featuredStage.className = "preview-featured";
     const filmstrip = document.createElement("div");
     filmstrip.className = "preview-filmstrip";
-    FEATURED_PHOTOS.forEach((photo, index) => {
+    visiblePhotos().forEach((photo, index) => {
       const button = document.createElement("button");
       button.className = `preview-item preview-item-${index + 1}`;
       button.type = "button";
@@ -378,29 +388,73 @@ function initializePreview() {
       button.setAttribute("aria-label", t("gallery.preview.open", { description: photoAlt(photo) }));
 
       const image = document.createElement("img");
-      image.src = photo.src;
+      image.src = index === 0 ? photo.src : photo.thumbnail;
       image.alt = photoAlt(photo);
       image.decoding = "async";
       image.loading = index === 0 ? "eager" : "lazy";
       if (index === 0) image.fetchPriority = "high";
-      image.style.objectPosition = photo.position;
 
       const caption = document.createElement("span");
       caption.textContent = t(photo.categoryKey);
       button.append(image, caption);
       (index === 0 ? featuredStage : filmstrip).append(button);
     });
-    preview.replaceChildren(featuredStage, filmstrip);
+    const refresh = document.createElement("button");
+    refresh.className = "preview-refresh glass-surface glass-interactive";
+    refresh.type = "button";
+    refresh.dataset.previewRefresh = "";
+    refresh.setAttribute("aria-label", t("gallery.preview.next"));
+    refresh.innerHTML = '<span aria-hidden="true">&#8635;</span>';
+    preview.replaceChildren(featuredStage, filmstrip, refresh);
+  };
+
+  const rotate = () => {
+    previewPage = (previewPage + 1) % pageCount;
+    render();
+  };
+  const stopRotation = () => {
+    window.clearInterval(rotationTimer);
+    rotationTimer = 0;
+  };
+  const startRotation = () => {
+    stopRotation();
+    if (reducedMotion?.matches || interactionPaused || document.hidden || pageCount < 2) return;
+    rotationTimer = window.setInterval(rotate, PREVIEW_ROTATION_MS);
   };
 
   preview.addEventListener("click", (event) => {
+    const refresh = event.target.closest("[data-preview-refresh]");
+    if (refresh) {
+      rotate();
+      startRotation();
+      return;
+    }
     const trigger = event.target.closest("[data-gallery-index]");
     if (!trigger) return;
     openButton.dataset.startIndex = trigger.dataset.galleryIndex;
     openButton.click();
   });
+  preview.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "mouse") return;
+    interactionPaused = true;
+    stopRotation();
+  });
+  preview.addEventListener("pointerleave", (event) => {
+    if (event.pointerType !== "mouse") return;
+    interactionPaused = false;
+    startRotation();
+  });
+  preview.addEventListener("focusin", () => { interactionPaused = true; stopRotation(); });
+  preview.addEventListener("focusout", (event) => {
+    if (preview.contains(event.relatedTarget)) return;
+    interactionPaused = false;
+    startRotation();
+  });
+  document.addEventListener("visibilitychange", startRotation);
+  reducedMotion?.addEventListener?.("change", startRotation);
   render();
   updateButton();
+  startRotation();
   PREFERENCES.subscribe(({ changed }) => {
     if (changed !== "language") return;
     render();
@@ -414,6 +468,7 @@ function initializeGallery() {
   const closeButton = document.querySelector("#gallery-close");
   const filters = document.querySelector("#gallery-filters");
   const stage = document.querySelector("#gallery-stage");
+  const imageViewport = document.querySelector("#gallery-image-viewport");
   const ambient = document.querySelector("#gallery-ambient");
   const mainImage = document.querySelector("#gallery-main-image");
   const previous = document.querySelector("#gallery-previous");
@@ -423,13 +478,42 @@ function initializeGallery() {
   const caption = document.querySelector("#gallery-photo-caption");
   const thumbnails = document.querySelector("#gallery-thumbnails");
   const live = document.querySelector("#gallery-live");
-  if (!dialog || !openButton || !closeButton || !filters || !stage || !ambient || !mainImage || !previous || !next || !counter || !category || !caption || !thumbnails || !live) return;
+  const zoomOut = document.querySelector("#gallery-zoom-out");
+  const zoomReset = document.querySelector("#gallery-zoom-reset");
+  const zoomIn = document.querySelector("#gallery-zoom-in");
+  if (!dialog || !openButton || !closeButton || !filters || !stage || !imageViewport || !ambient || !mainImage || !previous || !next || !counter || !category || !caption || !thumbnails || !live || !zoomOut || !zoomReset || !zoomIn) return;
 
   let returnFocus = openButton;
   let currentIndex = 0;
   let activeGroup = "all";
   let imageRequest = 0;
+  let zoomScale = 1;
+  let panX = 0;
+  let panY = 0;
   const failed = new Set();
+  const activePointers = new Map();
+  let pointerGesture = null;
+
+  const clampPan = () => {
+    const bounds = imageViewport.getBoundingClientRect();
+    const maxX = Math.max(0, (bounds.width * (zoomScale - 1)) / 2);
+    const maxY = Math.max(0, (bounds.height * (zoomScale - 1)) / 2);
+    panX = Math.min(maxX, Math.max(-maxX, panX));
+    panY = Math.min(maxY, Math.max(-maxY, panY));
+  };
+  const applyZoom = (nextScale = zoomScale, nextX = panX, nextY = panY) => {
+    zoomScale = Math.min(4, Math.max(1, nextScale));
+    panX = zoomScale === 1 ? 0 : nextX;
+    panY = zoomScale === 1 ? 0 : nextY;
+    clampPan();
+    mainImage.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoomScale})`;
+    imageViewport.classList.toggle("is-zoomed", zoomScale > 1);
+    zoomOut.disabled = zoomScale <= 1;
+    zoomIn.disabled = zoomScale >= 4;
+    zoomReset.textContent = `${Math.round(zoomScale * 100)}%`;
+    zoomReset.disabled = zoomScale === 1;
+  };
+  const resetZoom = () => applyZoom(1, 0, 0);
 
   const availableIndexes = () => GALLERY_PHOTOS
     .map((photo, index) => ({ photo, index }))
@@ -459,6 +543,7 @@ function initializeGallery() {
     if (!indexes.length) return;
     currentIndex = indexes.includes(requestedIndex) ? requestedIndex : indexes[0];
     const photo = GALLERY_PHOTOS[currentIndex];
+    resetZoom();
     const request = ++imageRequest;
     const applyImage = () => {
       if (request !== imageRequest) return;
@@ -486,7 +571,7 @@ function initializeGallery() {
     ambient.style.backgroundImage = `url("${photo.src}")`;
     category.textContent = t(photo.categoryKey);
     caption.textContent = t(photo.captionKey);
-    counter.textContent = t("gallery.counter", { current: currentIndex + 1, total: GALLERY_PHOTOS.length });
+    counter.textContent = t("gallery.counter", { current: indexes.indexOf(currentIndex) + 1, total: indexes.length });
     syncActiveThumbnail();
     preloadAdjacent();
     if (announce) live.textContent = `${category.textContent}. ${caption.textContent}. ${counter.textContent}`;
@@ -511,14 +596,15 @@ function initializeGallery() {
   };
   const renderThumbnails = () => {
     const fragment = document.createDocumentFragment();
-    availableIndexes().forEach((index) => {
+    const indexes = availableIndexes();
+    indexes.forEach((index, position) => {
       const photo = GALLERY_PHOTOS[index];
       const item = document.createElement("span");
       item.setAttribute("role", "listitem");
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.galleryIndex = String(index);
-      button.setAttribute("aria-label", t("gallery.thumbnail.aria", { current: index + 1, total: GALLERY_PHOTOS.length, description: photoAlt(photo) }));
+      button.setAttribute("aria-label", t("gallery.thumbnail.aria", { current: position + 1, total: indexes.length, description: photoAlt(photo) }));
       if (index === currentIndex) button.setAttribute("aria-current", "true");
       const image = document.createElement("img");
       image.src = photo.thumbnail;
@@ -576,6 +662,13 @@ function initializeGallery() {
     if (!navigationButton) return;
     navigate(navigationButton === next ? 1 : -1);
   });
+  zoomOut.addEventListener("click", () => applyZoom(zoomScale - .5));
+  zoomIn.addEventListener("click", () => applyZoom(zoomScale + .5));
+  zoomReset.addEventListener("click", resetZoom);
+  imageViewport.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    applyZoom(zoomScale > 1 ? 1 : 2, 0, 0);
+  });
   dialog.addEventListener("keydown", (event) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
     if (event.key === "ArrowLeft") { event.preventDefault(); navigate(-1); }
@@ -583,20 +676,60 @@ function initializeGallery() {
     if (event.key === "Home") { event.preventDefault(); showPhoto(availableIndexes()[0], true); }
     if (event.key === "End") { event.preventDefault(); showPhoto(availableIndexes().at(-1), true); }
   });
-  let swipeStart = null;
-  stage.addEventListener("pointerdown", (event) => {
-    if (event.target.closest("button")) return;
-    stage.setPointerCapture?.(event.pointerId);
-    swipeStart = { x: event.clientX, y: event.clientY };
+  const pointerDistance = () => {
+    const [first, second] = Array.from(activePointers.values());
+    return first && second ? Math.hypot(second.x - first.x, second.y - first.y) : 0;
+  };
+  imageViewport.addEventListener("pointerdown", (event) => {
+    imageViewport.setPointerCapture?.(event.pointerId);
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (activePointers.size === 2) {
+      pointerGesture = { type: "pinch", distance: pointerDistance(), scale: zoomScale };
+      return;
+    }
+    pointerGesture = {
+      type: zoomScale > 1 ? "pan" : "swipe",
+      startX: event.clientX,
+      startY: event.clientY,
+      panX,
+      panY,
+      moved: false
+    };
   });
-  stage.addEventListener("pointerup", (event) => {
-    if (!swipeStart) return;
-    const deltaX = event.clientX - swipeStart.x;
-    const deltaY = event.clientY - swipeStart.y;
-    swipeStart = null;
+  imageViewport.addEventListener("pointermove", (event) => {
+    if (!activePointers.has(event.pointerId)) return;
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (activePointers.size >= 2 && pointerGesture?.type === "pinch") {
+      const distance = pointerDistance();
+      if (pointerGesture.distance > 0) applyZoom(pointerGesture.scale * distance / pointerGesture.distance);
+      event.preventDefault();
+      return;
+    }
+    if (pointerGesture?.type === "pan") {
+      const deltaX = event.clientX - pointerGesture.startX;
+      const deltaY = event.clientY - pointerGesture.startY;
+      pointerGesture.moved ||= Math.hypot(deltaX, deltaY) > 4;
+      applyZoom(zoomScale, pointerGesture.panX + deltaX, pointerGesture.panY + deltaY);
+      event.preventDefault();
+    }
+  });
+  const finishPointer = (event, cancelled = false) => {
+    if (!activePointers.has(event.pointerId)) return;
+    const gesture = pointerGesture;
+    activePointers.delete(event.pointerId);
+    if (activePointers.size) {
+      const remaining = Array.from(activePointers.values())[0];
+      pointerGesture = { type: zoomScale > 1 ? "pan" : "swipe", startX: remaining.x, startY: remaining.y, panX, panY, moved: false };
+      return;
+    }
+    pointerGesture = null;
+    if (cancelled || gesture?.type !== "swipe" || zoomScale > 1) return;
+    const deltaX = event.clientX - gesture.startX;
+    const deltaY = event.clientY - gesture.startY;
     if (Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) navigate(deltaX < 0 ? 1 : -1);
-  });
-  stage.addEventListener("pointercancel", () => { swipeStart = null; });
+  };
+  imageViewport.addEventListener("pointerup", (event) => finishPointer(event));
+  imageViewport.addEventListener("pointercancel", (event) => finishPointer(event, true));
   stage.addEventListener("dragstart", (event) => event.preventDefault());
   PREFERENCES.subscribe(({ changed }) => {
     if (changed !== "language") return;
