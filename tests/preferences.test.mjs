@@ -109,8 +109,8 @@ test("connects every static and programmatic translation key", () => {
 test("applies the saved Linktree theme before styles load", () => {
   const bootstrap = html.indexOf('localStorage.getItem("cs-linktree-theme-v1")');
   const firstStylesheet = html.indexOf('<link rel="stylesheet"');
-  const preferencesScript = html.indexOf('<script src="preferences.js?v=gallery-photo-counter-20260721" defer>');
-  const appScript = html.indexOf('<script src="app.js?v=gallery-photo-counter-20260721" defer>');
+  const preferencesScript = html.indexOf('<script src="preferences.js?v=gallery-photo-counter-20260721b" defer>');
+  const appScript = html.indexOf('<script src="app.js?v=gallery-photo-counter-20260721b" defer>');
   assert.ok(bootstrap > 0 && bootstrap < firstStylesheet);
   assert.ok(preferencesScript > firstStylesheet && preferencesScript < appScript);
   assert.match(html, /data-theme="dark"/);

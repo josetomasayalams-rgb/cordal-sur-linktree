@@ -39,7 +39,7 @@ assert.match(html, /id="gallery-tour"/);
 assert.match(html, /id="gallery-scroll"/);
 assert.match(html, /class="gallery-close-symbol"/);
 assert.doesNotMatch(html, /gallery-close-arrow|gallery-close-lockup/);
-assert.match(html, /data-build="gallery-photo-counter-20260721"/);
+assert.match(html, /data-build="gallery-photo-counter-20260721b"/);
 assert.match(html, /assets\/photos\/01-sala-02\.webp/);
 assert.doesNotMatch(html, /hero-layer-a|carousel-toggle|photo-viewer|1\/13/);
 
