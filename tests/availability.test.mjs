@@ -153,9 +153,9 @@ test("builds localized WhatsApp enquiries with optional estimates", () => {
 });
 
 test("loads preferences and property data before the application", () => {
-  const preferences = html.indexOf('<script src="preferences.js" defer>');
-  const propertyData = html.indexOf('<script src="property-data.js" defer>');
-  const availability = html.indexOf('<script src="availability.js" defer>');
-  const app = html.indexOf('<script src="app.js" defer>');
+  const preferences = html.indexOf('<script src="preferences.js?v=gallery-photo-counter-20260721" defer>');
+  const propertyData = html.indexOf('<script src="property-data.js?v=gallery-photo-counter-20260721" defer>');
+  const availability = html.indexOf('<script src="availability.js?v=gallery-photo-counter-20260721" defer>');
+  const app = html.indexOf('<script src="app.js?v=gallery-photo-counter-20260721" defer>');
   assert.ok(preferences > 0 && preferences < propertyData && propertyData < availability && availability < app);
 });

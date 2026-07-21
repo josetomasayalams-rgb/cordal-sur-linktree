@@ -644,13 +644,6 @@ html[data-theme="dark"] .brand-stage--themed .brand-mark--dark { display: block;
   font: inherit;
   line-height: 1;
 }
-.gallery-close-lockup {
-  display: grid;
-  grid-template-rows: 22px 8px;
-  place-items: center;
-  gap: 1px;
-  transform: translateY(1px);
-}
 .gallery-close-symbol {
   width: 24px;
   height: 22px;
@@ -659,7 +652,6 @@ html[data-theme="dark"] .brand-stage--themed .brand-mark--dark { display: block;
   -webkit-mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
   mask: url("assets/brand/cordal-sur-symbol-reverse.svg") center / contain no-repeat;
 }
-.gallery-close-arrow { font-size: .64rem; font-weight: 800; line-height: 1; }
 .gallery-scroll {
   min-height: 0;
   overflow-x: hidden;
@@ -1014,9 +1006,12 @@ html[data-theme="dark"] :focus-visible { outline-color: #f5f7f2; box-shadow: 0 0
     box-shadow: none;
   }
   html[data-theme="dark"] .gallery-header .gallery-close { background: transparent; }
-  .gallery-close-symbol { width: 22px; height: 20px; }
-  .gallery-close-lockup { grid-template-rows: 20px 7px; }
-  .gallery-close-arrow { font-size: .58rem; }
+  .gallery-close-symbol { width: 25px; height: 23px; }
+  .gallery-header .gallery-close:focus-visible { outline: none; box-shadow: none; }
+  .gallery-header .gallery-close:focus-visible .gallery-close-symbol {
+    filter: drop-shadow(0 0 3px rgba(240, 204, 145, .92));
+    transform: scale(1.08);
+  }
   .gallery-header.is-compact {
     width: min(calc(100% - 24px), 252px);
     grid-template-columns: 44px minmax(0, 1fr) 34px;
@@ -1067,6 +1062,8 @@ html[data-theme="dark"] :focus-visible { outline-color: #f5f7f2; box-shadow: 0 0
   .gallery-header p:last-child,
   .gallery-counter { color: CanvasText; }
   .gallery-header .gallery-close { color: ButtonText; background: ButtonFace; border-color: ButtonText; box-shadow: none; }
+  .gallery-header .gallery-close:focus-visible { outline: 2px solid ButtonText; }
+  .gallery-header .gallery-close:focus-visible .gallery-close-symbol { filter: none; transform: none; }
 }
 @media (forced-colors: active) {
   .hero-title,
