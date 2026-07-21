@@ -12,10 +12,9 @@
     ".platform-card",
     ".travel-card",
     ".share-button",
-    ".icon-button",
     ".gallery-trigger",
     ".gallery-close",
-    ".gallery-image-button"
+    ".gallery-nav"
   ].join(",");
 
   const INTERACTIVE_SELECTOR = [
@@ -24,10 +23,9 @@
     ".platform-card",
     ".travel-card",
     ".share-button",
-    ".icon-button",
     ".gallery-trigger",
     ".gallery-close",
-    ".gallery-image-button"
+    ".gallery-nav"
   ].join(",");
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");

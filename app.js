@@ -4,6 +4,19 @@ const PREFERENCES = window.CS_LINKTREE_PREFERENCES;
 if (!PREFERENCES) throw new Error("Cordal Sur preferences failed to initialize.");
 const t = (key, values) => values ? PREFERENCES.format(key, values) : PREFERENCES.t(key);
 const WHATSAPP_PHONE = "56990137732";
+const PROPERTIES = window.CS_LINKTREE_PROPERTIES;
+if (!Array.isArray(PROPERTIES) || !PROPERTIES.length) throw new Error("Cordal Sur property data failed to initialize.");
+
+const requestedPropertyId = (() => {
+  try { return new URL(window.location.href).searchParams.get("property"); } catch { return null; }
+})();
+const ACTIVE_PROPERTY = PROPERTIES.find(({ id }) => id === requestedPropertyId) || PROPERTIES[0];
+const PHOTO_GROUPS = ACTIVE_PROPERTY.groups;
+const GALLERY_PHOTOS = ACTIVE_PROPERTY.photos;
+const FEATURED_PHOTOS = Object.freeze(ACTIVE_PROPERTY.featured.map((featured) => Object.freeze({
+  ...GALLERY_PHOTOS.find(({ id }) => id === featured.id),
+  position: featured.position
+})));
 
 const BRAND_ASSETS = Object.freeze({
   whatsapp: Object.freeze({
@@ -122,49 +135,7 @@ const LINKS = Object.freeze([
   })
 ]);
 
-const PHOTO_GROUPS = Object.freeze([
-  Object.freeze({ id: "sala", titleKey: "gallery.sala", captionKey: "gallery.sala.caption", slug: "01-sala", count: 2 }),
-  Object.freeze({ id: "cocina", titleKey: "gallery.cocina", captionKey: "gallery.cocina.caption", slug: "02-cocina-completa", count: 4 }),
-  Object.freeze({ id: "comedor", titleKey: "gallery.comedor", captionKey: "gallery.comedor.caption", slug: "03-comedor", count: 2 }),
-  Object.freeze({ id: "habitacion1", titleKey: "gallery.habitacion1", captionKey: "gallery.habitacion1.caption", slug: "04-habitacion-1", count: 7 }),
-  Object.freeze({ id: "habitacion2", titleKey: "gallery.habitacion2", captionKey: "gallery.habitacion2.caption", slug: "05-habitacion-2", count: 15 }),
-  Object.freeze({ id: "habitacion3", titleKey: "gallery.habitacion3", captionKey: "gallery.habitacion3.caption", slug: "06-habitacion-3", count: 5 }),
-  Object.freeze({ id: "bano1", titleKey: "gallery.bano1", captionKey: "gallery.bano1.caption", slug: "07-bano-completo-1", count: 2 }),
-  Object.freeze({ id: "bano2", titleKey: "gallery.bano2", captionKey: "gallery.bano2.caption", slug: "08-bano-completo-2", count: 2 }),
-  Object.freeze({ id: "balcon", titleKey: "gallery.balcon", captionKey: "gallery.balcon.caption", slug: "09-balcon", count: 1 }),
-  Object.freeze({ id: "exterior", titleKey: "gallery.exterior", captionKey: "gallery.exterior.caption", slug: "10-exterior", count: 6 }),
-  Object.freeze({ id: "entrada", titleKey: "gallery.entrada", captionKey: "gallery.entrada.caption", slug: "11-entrada-guardabotas", count: 1 })
-]);
-
-const GALLERY_PHOTOS = Object.freeze(PHOTO_GROUPS.flatMap((group) =>
-  Array.from({ length: group.count }, (_, index) => Object.freeze({
-    categoryKey: group.titleKey,
-    captionKey: group.captionKey ?? `photo.${group.id}.${index}`,
-    groupId: group.id,
-    src: `assets/photos/${group.slug}-${String(group.files?.[index] ?? index + 1).padStart(2, "0")}.webp`
-  }))
-));
-
-const HERO_SEQUENCE = Object.freeze([
-  ["01-sala-01", "gallery.sala"],
-  ["02-cocina-completa-01", "gallery.cocina"],
-  ["03-comedor-01", "gallery.comedor"],
-  ["04-habitacion-1-01", "gallery.habitacion1"],
-  ["05-habitacion-2-01", "gallery.habitacion2"],
-  ["06-habitacion-3-01", "gallery.habitacion3"],
-  ["07-bano-completo-1-01", "gallery.bano1"],
-  ["08-bano-completo-2-01", "gallery.bano2"],
-  ["09-balcon-01", "gallery.balcon"],
-  ["10-exterior-01", "gallery.exterior"],
-  ["11-entrada-guardabotas-01", "gallery.entrada"]
-]);
-
-const HERO_PHOTOS = Object.freeze(HERO_SEQUENCE.map(([basename, captionKey]) => {
-  const photo = GALLERY_PHOTOS.find(({ src }) => src.endsWith(`/${basename}.webp`));
-  return Object.freeze({ ...photo, captionKey });
-}));
-
-Object.assign(window, { LINKS, BRAND_ASSETS, HERO_PHOTOS, GALLERY_PHOTOS });
+Object.assign(window, { LINKS, BRAND_ASSETS, PROPERTIES, ACTIVE_PROPERTY, FEATURED_PHOTOS, GALLERY_PHOTOS });
 
 const ALLOWED_HOSTS = new Set([
   "wa.me", "www.airbnb.cl", "www.booking.com", "www.instagram.com",
@@ -361,296 +332,278 @@ function initializePayment() {
   dialog.addEventListener("close", () => returnFocus?.focus());
 }
 
-function initializeCarousel() {
-  const layerA = document.querySelector("#hero-layer-a");
-  const layerB = document.querySelector("#hero-layer-b");
-  const caption = document.querySelector("#hero-caption");
-  const counter = document.querySelector("#hero-counter");
-  const previous = document.querySelector("#carousel-prev");
-  const toggle = document.querySelector("#carousel-toggle");
-  const next = document.querySelector("#carousel-next");
-  if (!layerA || !layerB || !caption || !counter) return;
+function initializePropertySelector() {
+  const selector = document.querySelector("#property-selector");
+  if (!selector || PROPERTIES.length < 2) return;
+  selector.hidden = false;
+  const render = () => {
+    selector.setAttribute("aria-label", t("property.selector.aria"));
+    const fragment = document.createDocumentFragment();
+    PROPERTIES.forEach((property) => {
+      const anchor = document.createElement("a");
+      const url = new URL(window.location.href);
+      url.searchParams.set("property", property.id);
+      anchor.href = url.href;
+      anchor.textContent = property.name;
+      if (property.id === ACTIVE_PROPERTY.id) anchor.setAttribute("aria-current", "page");
+      fragment.append(anchor);
+    });
+    selector.replaceChildren(fragment);
+  };
+  render();
+  PREFERENCES.subscribe(({ changed }) => { if (changed === "language") render(); });
+}
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const failed = new Set();
-  let currentIndex = 0;
-  let activeLayer = layerA;
-  let standbyLayer = layerB;
-  let autoplayTimer = 0;
-  let preloadTimer = 0;
-  let transitioning = false;
-  let manuallyPaused = false;
+function initializePreview() {
+  const preview = document.querySelector("#property-preview");
+  const openButton = document.querySelector("#open-gallery");
+  const label = document.querySelector("#gallery-trigger-label");
+  if (!preview || !openButton || !label) return;
 
-  const wrap = (index) => (index + HERO_PHOTOS.length) % HERO_PHOTOS.length;
-  const isPaused = () => manuallyPaused || reduceMotion.matches || document.hidden;
-  const findAvailable = (start, direction) => {
-    for (let offset = 0; offset < HERO_PHOTOS.length; offset += 1) {
-      const index = wrap(start + offset * direction);
-      if (!failed.has(HERO_PHOTOS[index].src)) return index;
-    }
-    return currentIndex;
+  const updateButton = () => {
+    const text = t("gallery.open", { count: GALLERY_PHOTOS.length });
+    label.textContent = text;
+    openButton.setAttribute("aria-label", text);
   };
-  const assignPhoto = (layer, photo) => {
-    layer.alt = photoAlt(photo);
-    if (layer.dataset.photo !== photo.src) {
-      layer.dataset.photo = photo.src;
-      layer.src = photo.src;
-    }
-  };
-  const ensurePhoto = async (layer, photo) => {
-    assignPhoto(layer, photo);
-    if (!layer.complete) {
-      await new Promise((resolve) => {
-        layer.addEventListener("load", resolve, { once: true });
-        layer.addEventListener("error", resolve, { once: true });
-      });
-    }
-    if (layer.naturalWidth > 0) return true;
-    failed.add(photo.src);
-    return false;
-  };
-  const updateMeta = () => {
-    const photo = HERO_PHOTOS[currentIndex];
-    caption.textContent = t(photo.captionKey);
-    counter.textContent = `${currentIndex + 1}/${HERO_PHOTOS.length}`;
-  };
-  const updateToggle = () => {
-    if (!toggle) return;
-    toggle.disabled = reduceMotion.matches;
-    if (reduceMotion.matches) {
-      toggle.setAttribute("aria-pressed", "true");
-      toggle.setAttribute("aria-label", t("carousel.reduced"));
-      const mark = toggle.querySelector(".pause-mark");
-      if (mark) mark.textContent = "Ⅱ";
-      return;
-    }
-    const paused = manuallyPaused || reduceMotion.matches;
-    toggle.setAttribute("aria-pressed", String(paused));
-    toggle.setAttribute("aria-label", t(paused ? "carousel.resume" : "carousel.pause"));
-    const mark = toggle.querySelector(".pause-mark");
-    if (mark) mark.textContent = paused ? "▶" : "Ⅱ";
-  };
-  const clearAutoplay = () => window.clearTimeout(autoplayTimer);
-  const preloadNext = () => {
-    const index = findAvailable(currentIndex + 1, 1);
-    if (index !== currentIndex) assignPhoto(standbyLayer, HERO_PHOTOS[index]);
-  };
-  const scheduleAutoplay = () => {
-    clearAutoplay();
-    if (!isPaused() && !transitioning) {
-      autoplayTimer = window.setTimeout(() => navigate(1), 6000);
-    }
-  };
-  const showIndex = async (requestedIndex, direction) => {
-    if (transitioning) return;
-    clearAutoplay();
-    window.clearTimeout(preloadTimer);
-    let targetIndex = findAvailable(requestedIndex, direction);
-    if (targetIndex === currentIndex) {
-      scheduleAutoplay();
-      return;
-    }
-    transitioning = true;
-    let loaded = false;
-    for (let attempts = 0; attempts < HERO_PHOTOS.length; attempts += 1) {
-      loaded = await ensurePhoto(standbyLayer, HERO_PHOTOS[targetIndex]);
-      if (loaded) break;
-      targetIndex = findAvailable(targetIndex + direction, direction);
-    }
-    if (!loaded) {
-      transitioning = false;
-      scheduleAutoplay();
-      return;
-    }
-    standbyLayer.classList.add("is-active");
-    activeLayer.classList.remove("is-active");
-    currentIndex = targetIndex;
-    updateMeta();
-    [activeLayer, standbyLayer] = [standbyLayer, activeLayer];
-    preloadTimer = window.setTimeout(() => {
-      transitioning = false;
-      preloadNext();
-      scheduleAutoplay();
-    }, 650);
-  };
-  function navigate(direction) {
-    return showIndex(currentIndex + direction, direction);
-  }
+  const render = () => {
+    const featuredStage = document.createElement("div");
+    featuredStage.className = "preview-featured";
+    const filmstrip = document.createElement("div");
+    filmstrip.className = "preview-filmstrip";
+    FEATURED_PHOTOS.forEach((photo, index) => {
+      const button = document.createElement("button");
+      button.className = `preview-item preview-item-${index + 1}`;
+      button.type = "button";
+      button.dataset.galleryIndex = String(GALLERY_PHOTOS.findIndex(({ id }) => id === photo.id));
+      button.setAttribute("aria-label", t("gallery.preview.open", { description: photoAlt(photo) }));
 
-  previous?.addEventListener("click", () => navigate(-1));
-  next?.addEventListener("click", () => navigate(1));
-  toggle?.addEventListener("click", () => {
-    if (reduceMotion.matches) return;
-    manuallyPaused = !manuallyPaused;
-    updateToggle();
-    scheduleAutoplay();
+      const image = document.createElement("img");
+      image.src = photo.src;
+      image.alt = photoAlt(photo);
+      image.decoding = "async";
+      image.loading = index === 0 ? "eager" : "lazy";
+      if (index === 0) image.fetchPriority = "high";
+      image.style.objectPosition = photo.position;
+
+      const caption = document.createElement("span");
+      caption.textContent = t(photo.categoryKey);
+      button.append(image, caption);
+      (index === 0 ? featuredStage : filmstrip).append(button);
+    });
+    preview.replaceChildren(featuredStage, filmstrip);
+  };
+
+  preview.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-gallery-index]");
+    if (!trigger) return;
+    openButton.dataset.startIndex = trigger.dataset.galleryIndex;
+    openButton.click();
   });
-  document.addEventListener("visibilitychange", () => document.hidden ? clearAutoplay() : scheduleAutoplay());
-  reduceMotion.addEventListener("change", () => {
-    updateToggle();
-    scheduleAutoplay();
-  });
+  render();
+  updateButton();
   PREFERENCES.subscribe(({ changed }) => {
     if (changed !== "language") return;
-    assignPhoto(activeLayer, HERO_PHOTOS[currentIndex]);
-    const standbyPhoto = HERO_PHOTOS.find(({ src }) => src === standbyLayer.dataset.photo);
-    if (standbyPhoto) assignPhoto(standbyLayer, standbyPhoto);
-    updateMeta();
-    updateToggle();
+    render();
+    updateButton();
   });
-
-  const swipeSurface = layerA.closest(".hero-media") || layerA.parentElement;
-  let swipeStart = null;
-  swipeSurface?.addEventListener("pointerdown", (event) => {
-    if (event.target.closest("button, a")) return;
-    swipeSurface.setPointerCapture?.(event.pointerId);
-    swipeStart = { x: event.clientX, y: event.clientY };
-  });
-  swipeSurface?.addEventListener("pointerup", (event) => {
-    if (!swipeStart) return;
-    const deltaX = event.clientX - swipeStart.x;
-    const deltaY = event.clientY - swipeStart.y;
-    swipeStart = null;
-    if (Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) navigate(deltaX < 0 ? 1 : -1);
-  });
-  swipeSurface?.addEventListener("pointercancel", () => { swipeStart = null; });
-  swipeSurface?.addEventListener("dragstart", (event) => event.preventDefault());
-
-  (async () => {
-    while (!(await ensurePhoto(activeLayer, HERO_PHOTOS[currentIndex]))) {
-      const nextIndex = findAvailable(currentIndex + 1, 1);
-      if (nextIndex === currentIndex) return;
-      currentIndex = nextIndex;
-    }
-    activeLayer.classList.add("is-active");
-    updateMeta();
-    updateToggle();
-    preloadNext();
-    scheduleAutoplay();
-  })();
 }
 
 function initializeGallery() {
   const dialog = document.querySelector("#gallery-dialog");
   const openButton = document.querySelector("#open-gallery");
   const closeButton = document.querySelector("#gallery-close");
-  const grid = document.querySelector("#gallery-grid");
-  const viewer = document.querySelector("#photo-viewer"), viewerImage = document.querySelector("#photo-viewer-image"), viewerCaption = document.querySelector("#photo-viewer-caption");
-  const viewerClose = document.querySelector("#photo-viewer-close"), viewerPrevious = document.querySelector("#photo-viewer-prev"), viewerNext = document.querySelector("#photo-viewer-next");
-  if (!dialog || !openButton || !closeButton || !grid || !viewer || !viewerImage || !viewerCaption || !viewerClose || !viewerPrevious || !viewerNext) return;
-  let populated = false;
+  const filters = document.querySelector("#gallery-filters");
+  const stage = document.querySelector("#gallery-stage");
+  const ambient = document.querySelector("#gallery-ambient");
+  const mainImage = document.querySelector("#gallery-main-image");
+  const previous = document.querySelector("#gallery-previous");
+  const next = document.querySelector("#gallery-next");
+  const counter = document.querySelector("#gallery-counter");
+  const category = document.querySelector("#gallery-photo-category");
+  const caption = document.querySelector("#gallery-photo-caption");
+  const thumbnails = document.querySelector("#gallery-thumbnails");
+  const live = document.querySelector("#gallery-live");
+  if (!dialog || !openButton || !closeButton || !filters || !stage || !ambient || !mainImage || !previous || !next || !counter || !category || !caption || !thumbnails || !live) return;
+
   let returnFocus = openButton;
-  let viewerIndex = 0;
-  let viewerReturn = null;
+  let currentIndex = 0;
+  let activeGroup = "all";
+  let imageRequest = 0;
+  const failed = new Set();
 
-  const showViewerPhoto = (index) => {
-    viewerIndex = (index + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length;
-    const photo = GALLERY_PHOTOS[viewerIndex];
-    viewerImage.src = photo.src;
-    viewerImage.alt = photoAlt(photo);
-    viewerCaption.textContent = `${t(photo.categoryKey)} · ${t(photo.captionKey)} · ${viewerIndex + 1}/${GALLERY_PHOTOS.length}`;
+  const availableIndexes = () => GALLERY_PHOTOS
+    .map((photo, index) => ({ photo, index }))
+    .filter(({ photo }) => (activeGroup === "all" || photo.groupId === activeGroup) && !failed.has(photo.id))
+    .map(({ index }) => index);
+  const preloadAdjacent = () => {
+    if (typeof Image !== "function") return;
+    const indexes = availableIndexes();
+    const position = indexes.indexOf(currentIndex);
+    if (position < 0) return;
+    [-1, 1].forEach((offset) => {
+      const image = new Image();
+      image.src = GALLERY_PHOTOS[indexes[(position + offset + indexes.length) % indexes.length]].src;
+    });
   };
-  const closeViewer = () => viewer.open ? viewer.close() : viewer.removeAttribute("open");
-  const openViewer = (index, trigger) => {
-    viewerReturn = trigger;
-    showViewerPhoto(index);
-    if (typeof viewer.showModal === "function") viewer.showModal();
-    else viewer.setAttribute("open", "");
-    viewerClose.focus();
+  const syncActiveThumbnail = () => {
+    thumbnails.querySelectorAll("button").forEach((button) => {
+      const active = Number(button.dataset.galleryIndex) === currentIndex;
+      button.toggleAttribute("aria-current", active);
+      if (active) {
+        thumbnails.scrollLeft = Math.max(0, button.offsetLeft - (thumbnails.clientWidth - button.clientWidth) / 2);
+      }
+    });
   };
-
-  const populate = () => {
-    if (populated) return;
+  const showPhoto = (requestedIndex, announce = false) => {
+    const indexes = availableIndexes();
+    if (!indexes.length) return;
+    currentIndex = indexes.includes(requestedIndex) ? requestedIndex : indexes[0];
+    const photo = GALLERY_PHOTOS[currentIndex];
+    const request = ++imageRequest;
+    const applyImage = () => {
+      if (request !== imageRequest) return;
+      mainImage.dataset.photoId = photo.id;
+      mainImage.src = photo.src;
+      mainImage.alt = photoAlt(photo);
+      mainImage.classList.remove("is-loading");
+    };
+    const handleImageError = () => {
+      if (request !== imageRequest) return;
+      failed.add(photo.id);
+      live.textContent = t("gallery.photo.unavailable");
+      renderThumbnails();
+      navigate(1);
+    };
+    mainImage.classList.add("is-loading");
+    if (typeof Image === "function") {
+      const loader = new Image();
+      loader.addEventListener("load", applyImage, { once: true });
+      loader.addEventListener("error", handleImageError, { once: true });
+      loader.src = photo.src;
+    } else {
+      applyImage();
+    }
+    ambient.style.backgroundImage = `url("${photo.src}")`;
+    category.textContent = t(photo.categoryKey);
+    caption.textContent = t(photo.captionKey);
+    counter.textContent = t("gallery.counter", { current: currentIndex + 1, total: GALLERY_PHOTOS.length });
+    syncActiveThumbnail();
+    preloadAdjacent();
+    if (announce) live.textContent = `${category.textContent}. ${caption.textContent}. ${counter.textContent}`;
+  };
+  const navigate = (direction) => {
+    const indexes = availableIndexes();
+    if (!indexes.length) return;
+    const position = Math.max(0, indexes.indexOf(currentIndex));
+    showPhoto(indexes[(position + direction + indexes.length) % indexes.length], true);
+  };
+  const renderFilters = () => {
     const fragment = document.createDocumentFragment();
-    PHOTO_GROUPS.forEach((group) => {
-      const section = document.createElement("section");
-      section.className = "gallery-group";
-      section.setAttribute("aria-labelledby", `gallery-group-${group.id}`);
-      const title = document.createElement("h3");
-      title.className = "gallery-group-title";
-      title.id = `gallery-group-${group.id}`;
-      title.dataset.galleryGroupId = group.id;
-      title.textContent = `${t(group.titleKey)} · ${group.count}`;
-      const photos = document.createElement("div");
-      photos.className = "gallery-group-grid";
-      GALLERY_PHOTOS.filter(({ groupId }) => groupId === group.id).forEach((photo) => {
-        const figure = document.createElement("figure");
-        figure.className = "gallery-item";
-        const imageButton = document.createElement("button");
-        imageButton.className = "gallery-image-button";
-        imageButton.type = "button";
-        imageButton.dataset.galleryIndex = String(GALLERY_PHOTOS.indexOf(photo));
-        imageButton.setAttribute("aria-label", t("gallery.expand", { description: photoAlt(photo) }));
-        const image = document.createElement("img");
-        image.src = photo.src;
-        image.alt = photoAlt(photo);
-        image.loading = "lazy";
-        image.decoding = "async";
-        image.width = 960;
-        image.height = 720;
-        image.addEventListener("error", () => figure.classList.add("is-unavailable"), { once: true });
-        const figcaption = document.createElement("figcaption");
-        figcaption.textContent = t(photo.captionKey);
-        imageButton.append(image);
-        figure.append(imageButton, figcaption);
-        photos.append(figure);
-      });
-      section.append(title, photos);
-      fragment.append(section);
+    [{ id: "all", titleKey: "gallery.all", count: GALLERY_PHOTOS.length }, ...PHOTO_GROUPS].forEach((group) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.galleryGroup = group.id;
+      button.setAttribute("aria-pressed", String(group.id === activeGroup));
+      button.textContent = `${t(group.titleKey)} · ${group.count}`;
+      fragment.append(button);
     });
-    grid.append(fragment);
-    populated = true;
+    filters.replaceChildren(fragment);
   };
-  const translatePopulated = () => {
-    if (!populated) return;
-    grid.querySelectorAll("[data-gallery-group-id]").forEach((title) => {
-      const group = PHOTO_GROUPS.find(({ id }) => id === title.dataset.galleryGroupId);
-      if (group) title.textContent = `${t(group.titleKey)} · ${group.count}`;
+  const renderThumbnails = () => {
+    const fragment = document.createDocumentFragment();
+    availableIndexes().forEach((index) => {
+      const photo = GALLERY_PHOTOS[index];
+      const item = document.createElement("span");
+      item.setAttribute("role", "listitem");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.galleryIndex = String(index);
+      button.setAttribute("aria-label", t("gallery.thumbnail.aria", { current: index + 1, total: GALLERY_PHOTOS.length, description: photoAlt(photo) }));
+      if (index === currentIndex) button.setAttribute("aria-current", "true");
+      const image = document.createElement("img");
+      image.src = photo.thumbnail;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      button.append(image);
+      item.append(button);
+      fragment.append(item);
     });
-    grid.querySelectorAll(".gallery-image-button").forEach((button) => {
-      const photo = GALLERY_PHOTOS[Number(button.dataset.galleryIndex)];
-      if (!photo) return;
-      const image = button.querySelector("img");
-      const caption = button.closest("figure")?.querySelector("figcaption");
-      const alt = photoAlt(photo);
-      button.setAttribute("aria-label", t("gallery.expand", { description: alt }));
-      if (image) image.alt = alt;
-      if (caption) caption.textContent = t(photo.captionKey);
-    });
-    if (viewer.open) showViewerPhoto(viewerIndex);
+    thumbnails.replaceChildren(fragment);
   };
-  const close = () => dialog.open ? dialog.close() : dialog.removeAttribute("open");
+  const close = () => {
+    document.body.classList.remove("gallery-open");
+    if (dialog.open) dialog.close();
+    else dialog.removeAttribute("open");
+  };
 
   openButton.addEventListener("click", () => {
     returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : openButton;
-    populate();
+    activeGroup = "all";
+    currentIndex = Number(openButton.dataset.startIndex || 0);
+    delete openButton.dataset.startIndex;
+    renderFilters();
+    renderThumbnails();
+    showPhoto(currentIndex);
+    document.body.classList.add("gallery-open");
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
     closeButton.focus();
   });
   closeButton.addEventListener("click", close);
   dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+  dialog.addEventListener("cancel", (event) => { event.preventDefault(); close(); });
+  dialog.addEventListener("close", () => {
+    document.body.classList.remove("gallery-open");
+    returnFocus?.focus();
+  });
+  filters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-gallery-group]");
+    if (!button) return;
+    activeGroup = button.dataset.galleryGroup;
+    renderFilters();
+    const indexes = availableIndexes();
+    if (indexes.length) currentIndex = indexes[0];
+    renderThumbnails();
+    showPhoto(currentIndex, true);
+  });
+  thumbnails.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-gallery-index]");
+    if (button) showPhoto(Number(button.dataset.galleryIndex), true);
+  });
+  stage.addEventListener("click", (event) => {
+    const navigationButton = event.target.closest(".gallery-nav");
+    if (!navigationButton) return;
+    navigate(navigationButton === next ? 1 : -1);
+  });
   dialog.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    event.preventDefault();
-    close();
+    if (event.key === "Escape") { event.preventDefault(); close(); return; }
+    if (event.key === "ArrowLeft") { event.preventDefault(); navigate(-1); }
+    if (event.key === "ArrowRight") { event.preventDefault(); navigate(1); }
+    if (event.key === "Home") { event.preventDefault(); showPhoto(availableIndexes()[0], true); }
+    if (event.key === "End") { event.preventDefault(); showPhoto(availableIndexes().at(-1), true); }
   });
-  dialog.addEventListener("close", () => returnFocus?.focus());
-  grid.addEventListener("click", (event) => {
-    const trigger = event.target.closest(".gallery-image-button");
-    if (trigger) openViewer(Number(trigger.dataset.galleryIndex), trigger);
+  let swipeStart = null;
+  stage.addEventListener("pointerdown", (event) => {
+    if (event.target.closest("button")) return;
+    stage.setPointerCapture?.(event.pointerId);
+    swipeStart = { x: event.clientX, y: event.clientY };
   });
-  viewerClose.addEventListener("click", closeViewer);
-  viewerPrevious.addEventListener("click", () => showViewerPhoto(viewerIndex - 1));
-  viewerNext.addEventListener("click", () => showViewerPhoto(viewerIndex + 1));
-  viewer.addEventListener("click", (event) => { if (event.target === viewer) closeViewer(); });
-  viewer.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") { event.preventDefault(); closeViewer(); }
-    if (event.key === "ArrowLeft") showViewerPhoto(viewerIndex - 1);
-    if (event.key === "ArrowRight") showViewerPhoto(viewerIndex + 1);
+  stage.addEventListener("pointerup", (event) => {
+    if (!swipeStart) return;
+    const deltaX = event.clientX - swipeStart.x;
+    const deltaY = event.clientY - swipeStart.y;
+    swipeStart = null;
+    if (Math.abs(deltaX) >= 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) navigate(deltaX < 0 ? 1 : -1);
   });
-  viewer.addEventListener("close", () => viewerReturn?.focus());
-  PREFERENCES.subscribe(({ changed }) => { if (changed === "language") translatePopulated(); });
+  stage.addEventListener("pointercancel", () => { swipeStart = null; });
+  stage.addEventListener("dragstart", (event) => event.preventDefault());
+  PREFERENCES.subscribe(({ changed }) => {
+    if (changed !== "language") return;
+    renderFilters();
+    renderThumbnails();
+    showPhoto(currentIndex);
+  });
 }
 
 function initializeShare() {
@@ -714,6 +667,7 @@ function initializeShare() {
 
 initializeLinks();
 initializePayment();
-initializeCarousel();
+initializePropertySelector();
+initializePreview();
 initializeGallery();
 initializeShare();

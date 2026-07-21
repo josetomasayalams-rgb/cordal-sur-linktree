@@ -73,9 +73,10 @@ test("renders the reservation tray as accessible logo-only links", () => {
 
 test("switches Cordal brand surfaces between light and dark treatments", () => {
   assert.match(glass, /\.brand-stage--mask \{[\s\S]*?color: var\(--forest\);[\s\S]*?background: linear-gradient\(145deg, #fff, var\(--ivory\)\)/);
-  assert.match(glass, /\.brand-plate\.glass-surface \{[\s\S]*?--glass-fill: #fff/);
+  assert.match(html, /class="property-brand"/);
+  assert.match(styles, /\.brand-symbol \{[\s\S]*?background: var\(--forest\)/);
+  assert.match(styles, /\.brand-name \{[\s\S]*?color: var\(--forest\)/);
   assert.match(glass, /html\[data-theme="dark"\] \.brand-stage--mask \{[\s\S]*?color: var\(--ivory\);[\s\S]*?#245044, var\(--forest\)/);
-  assert.match(glass, /html\[data-theme="dark"\] \.brand-plate\.glass-surface \{[\s\S]*?--glass-fill: rgba\(21, 59, 51, \.94\)/);
   assert.match(styles, /html\[data-theme="dark"\] \.brand-symbol \{ background: var\(--ivory\); \}/);
   assert.match(styles, /html\[data-theme="dark"\] \.brand-name \{ color: var\(--ivory\); \}/);
 });

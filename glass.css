@@ -40,10 +40,6 @@
 }
 
 .glass-surface > * { position: relative; z-index: 1; }
-.brand-plate > .brand-logo { position: absolute; }
-.brand-plate.glass-surface,
-.hero-meta.glass-surface,
-.carousel-controls.glass-surface { position: absolute; }
 
 .glass-regular {
   --glass-fill: rgba(245, 247, 242, .94);
@@ -74,62 +70,6 @@
   .glass-regular { --glass-fill: rgba(245, 247, 242, .70); --glass-blur: 14px; }
   .glass-clear { --glass-fill: rgba(21, 59, 51, .72); --glass-blur: 12px; --glass-saturation: 145%; }
   .glass-tinted { --glass-fill: rgba(21, 59, 51, .78); --glass-blur: 12px; --glass-saturation: 135%; }
-}
-
-.brand-plate.glass-surface {
-  --glass-fill: #fff;
-  --glass-rim-c: rgba(217, 162, 79, .48);
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .62), 0 14px 34px rgba(21, 59, 51, .16);
-}
-
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .brand-plate.glass-surface { --glass-fill: #fff; --glass-blur: 16px; }
-}
-
-.location-badge {
-  background: rgba(21, 59, 51, .82);
-  border: 1px solid rgba(245, 247, 242, .34);
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .20), 0 8px 20px rgba(21, 59, 51, .18);
-}
-
-.hero-meta.glass-surface { --glass-fill: rgba(21, 59, 51, .80); --glass-blur: 10px; }
-.hero-counter { background: transparent; box-shadow: none; }
-
-.glass-toolbar {
-  --glass-fill: rgba(21, 59, 51, .78);
-  --glass-blur: 12px;
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .48), 0 14px 32px rgba(21, 59, 51, .24);
-}
-
-.glass-toolbar::after {
-  position: absolute;
-  z-index: 1;
-  top: 12px;
-  bottom: 12px;
-  left: 148px;
-  width: 1px;
-  content: "";
-  background: rgba(245, 247, 242, .22);
-  pointer-events: none;
-}
-
-.glass-toolbar .icon-button,
-.glass-toolbar .gallery-trigger {
-  position: relative;
-  z-index: 2;
-  transition: color 160ms ease, background-color 160ms ease, transform 180ms var(--glass-ease), box-shadow 180ms ease;
-}
-
-#carousel-toggle {
-  color: var(--forest);
-  background: rgba(217, 162, 79, .92);
-  box-shadow: inset 0 1px 0 rgba(245, 247, 242, .52), 0 4px 12px rgba(21, 59, 51, .18);
-}
-
-#carousel-toggle[aria-pressed="true"] {
-  color: var(--ivory);
-  background: rgba(245, 247, 242, .13);
-  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, .68);
 }
 
 .whatsapp-card.glass-surface {
@@ -219,14 +159,14 @@
 .payment-dialog::backdrop { background: rgba(21, 59, 51, .82); backdrop-filter: blur(5px); }
 
 .gallery-close,
-.photo-viewer-nav,
+.gallery-nav,
 .payment-dialog-close {
   background: rgba(245, 247, 242, .88);
   border: 1px solid rgba(245, 247, 242, .68);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82), 0 8px 20px rgba(21, 59, 51, .20);
 }
 
-.photo-viewer-nav { color: var(--forest); }
+.gallery-nav { color: var(--forest); }
 
 html[data-theme="dark"] .glass-surface {
   --glass-fill: rgba(15, 42, 36, .92);
@@ -247,12 +187,6 @@ html[data-theme="dark"] .glass-surface::before {
 html[data-theme="dark"] .glass-regular { --glass-fill: rgba(15, 42, 36, .88); color: #f5f7f2; }
 html[data-theme="dark"] .glass-clear { --glass-fill: rgba(7, 25, 20, .82); color: #f5f7f2; }
 html[data-theme="dark"] .glass-tinted { --glass-fill: rgba(18, 56, 47, .92); color: #f5f7f2; }
-html[data-theme="dark"] .brand-plate.glass-surface {
-  --glass-fill: rgba(21, 59, 51, .94);
-  --glass-rim-a: rgba(245,247,242,.34);
-  --glass-rim-b: rgba(245,247,242,.12);
-  --glass-rim-c: rgba(217,162,79,.52);
-}
 html[data-theme="dark"] .platform-card::before,
 html[data-theme="dark"] .travel-card::before {
   background: radial-gradient(circle 120px at var(--glass-x) var(--glass-y), rgba(245,247,242,.14), rgba(245,247,242,.04) 68%, transparent);
@@ -276,7 +210,7 @@ html[data-theme="dark"] .brand-stage--mask {
   border-color: rgba(245,247,242,.28);
 }
 html[data-theme="dark"] .gallery-close,
-html[data-theme="dark"] .photo-viewer-nav,
+html[data-theme="dark"] .gallery-nav,
 html[data-theme="dark"] .payment-dialog-close {
   color: #f5f7f2;
   background: rgba(36, 80, 68, .94);
@@ -287,7 +221,6 @@ html[data-theme="dark"] .payment-dialog-close {
 .glass-interactive,
 .platform-card,
 .travel-card,
-.icon-button,
 .gallery-trigger,
 .gallery-close {
   touch-action: manipulation;
@@ -297,18 +230,17 @@ html[data-theme="dark"] .payment-dialog-close {
 .platform-card.is-glass-active::before,
 .travel-card.is-glass-active::before { opacity: 1; }
 
-.glass-interactive.is-pressed:not(.photo-viewer-nav),
+.glass-interactive.is-pressed:not(.gallery-nav),
 .platform-card.is-pressed,
-.travel-card.is-pressed,
-.gallery-image-button.is-pressed {
+.travel-card.is-pressed {
   transform: translateY(1px) scale(.985);
   box-shadow: inset 0 1px 0 rgba(245, 247, 242, .42), 0 7px 16px rgba(21, 59, 51, .14);
 }
 
-.photo-viewer-nav.is-pressed { transform: translateY(-50%) scale(.94); }
+.gallery-nav.is-pressed { transform: translateY(-50%) scale(.94); }
 
 @media (hover: hover) and (pointer: fine) {
-  .glass-interactive:hover:not(.photo-viewer-nav),
+  .glass-interactive:hover:not(.gallery-nav),
   .platform-card:hover,
   .travel-card:hover { transform: translateY(-2px); }
   .platform-card:hover .brand-stage,
@@ -319,10 +251,7 @@ html[data-theme="dark"] .payment-dialog-close {
     box-shadow: inset 0 1px 0 rgba(255,255,255,.72), 0 10px 24px rgba(21,59,51,.18), 0 0 0 1px rgba(217,162,79,.15);
     transform: translateY(-1px) scale(1.025);
   }
-  .glass-toolbar .icon-button:hover,
-  .glass-toolbar .gallery-trigger:hover { color: var(--forest); background: rgba(245, 247, 242, .82); }
-  #carousel-toggle:hover { background: var(--gold); }
-  .photo-viewer-nav:hover { color: var(--forest); background: var(--ivory); transform: translateY(-50%) scale(1.04); }
+  .gallery-nav:hover { color: var(--forest); background: var(--ivory); transform: translateY(-50%) scale(1.04); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -333,7 +262,7 @@ html[data-theme="dark"] .payment-dialog-close {
   .platform-card,
   .travel-card,
   .brand-stage { transform: none !important; transition: none !important; }
-  .photo-viewer-nav.glass-interactive { transform: translateY(-50%) !important; }
+  .gallery-nav.glass-interactive { transform: translateY(-50%) !important; }
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -351,7 +280,7 @@ html[data-theme="dark"] .payment-dialog-close {
 }
 
 @media (forced-colors: active) {
-  .glass-surface, .platform-card, .travel-card, .gallery-close, .photo-viewer-nav, .language-selector button, .theme-selector button, .availability-day, .availability-refresh, .availability-nav, .availability-price-toggle { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid ButtonText; box-shadow: none; }
+  .glass-surface, .platform-card, .travel-card, .gallery-close, .gallery-nav, .gallery-filters button, .gallery-thumbnails button, .language-selector button, .theme-selector button, .availability-day, .availability-refresh, .availability-nav, .availability-price-toggle { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid ButtonText; box-shadow: none; }
   .glass-surface::before, .platform-card::before, .travel-card::before { display: none; }
   .brand-stage--mask .brand-mark { background: CanvasText; }
   .brand-stage--native .brand-mark,
