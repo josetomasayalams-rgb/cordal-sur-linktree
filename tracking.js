@@ -76,7 +76,6 @@
     if (interactive.id === "whatsapp-link" || url.hostname === "wa.me") return "whatsapp";
     if (url.hostname.endsWith("airbnb.cl")) return "airbnb";
     if (url.hostname.endsWith("booking.com")) return "booking";
-    if (url.hostname === "cordal-sur-finanzas.jayala2407.chatgpt.site") return "finance";
     return "";
   }
 
@@ -99,7 +98,6 @@
     if (whatsapp instanceof HTMLAnchorElement) decorateLink(whatsapp, "whatsapp");
     document.querySelectorAll('a[href*="airbnb.cl"]').forEach((anchor) => decorateLink(anchor, "airbnb"));
     document.querySelectorAll('a[href*="booking.com"]').forEach((anchor) => decorateLink(anchor, "booking"));
-    document.querySelectorAll('a[href*="cordal-sur-finanzas.jayala2407.chatgpt.site"]').forEach((anchor) => decorateLink(anchor, "finance"));
 
     document.addEventListener("click", (event) => {
       const interactive = event.target instanceof Element ? event.target.closest("a, button") : null;
