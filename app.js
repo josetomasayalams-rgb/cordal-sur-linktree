@@ -469,25 +469,91 @@ function initializeGallery() {
   const filters = document.querySelector("#gallery-filters");
   const scrollArea = document.querySelector("#gallery-scroll");
   const header = dialog?.querySelector(".gallery-header");
+  const headerTitle = header?.querySelector("#gallery-title");
+  const headerDescription = header?.querySelector("#gallery-description");
   const tour = document.querySelector("#gallery-tour");
   const counter = document.querySelector("#gallery-counter");
   const live = document.querySelector("#gallery-live");
-  if (!dialog || !openButton || !closeButton || !filters || !scrollArea || !header || !tour || !counter || !live) return;
+  if (!dialog || !openButton || !closeButton || !filters || !scrollArea || !header || !headerTitle || !headerDescription || !tour || !counter || !live) return;
 
   let returnFocus = openButton;
   let imageObserver;
   let headerFrame = 0;
+  let scrollAnimationFrame = 0;
+  let currentHeaderGroupId = null;
   const galleryReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
+  const renderHeaderGroup = (groupId, force = false) => {
+    const group = PHOTO_GROUPS.find(({ id }) => id === groupId);
+    const nextGroupId = group?.id || null;
+    if (!force && nextGroupId === currentHeaderGroupId) return;
+    currentHeaderGroupId = nextGroupId;
+    const name = group ? t(group.titleKey) : ACTIVE_PROPERTY.name;
+    const count = group ? group.count : GALLERY_PHOTOS.length;
+    headerTitle.textContent = name;
+    headerDescription.textContent = group ? t(group.captionKey) : t("gallery.description");
+    counter.textContent = String(count);
+    counter.setAttribute("aria-label", group
+      ? t("gallery.group.count", { name, count })
+      : t("gallery.open", { count }));
+    header.dataset.group = group?.id || "property";
+    if (!force && !galleryReducedMotion?.matches) {
+      [headerTitle, counter].forEach((element) => element.animate?.(
+        [{ opacity: .48, transform: "translateY(2px)" }, { opacity: 1, transform: "translateY(0)" }],
+        { duration: 130, easing: "cubic-bezier(.16, 1, .3, 1)" }
+      ));
+    }
+  };
+  const visibleGroupId = () => {
+    const anchor = header.getBoundingClientRect().bottom + 10;
+    let groupId = null;
+    tour.querySelectorAll("[data-gallery-section]").forEach((section) => {
+      if (section.getBoundingClientRect().top <= anchor) groupId = section.dataset.gallerySection;
+    });
+    return groupId;
+  };
   const syncHeaderState = () => {
     headerFrame = 0;
-    const state = scrollArea.scrollTop > 48 ? "compact" : "expanded";
+    const state = scrollArea.scrollTop > 24 ? "compact" : "expanded";
     header.classList.toggle("is-compact", state === "compact");
     header.dataset.state = state;
+    const groupId = state === "compact" ? visibleGroupId() : null;
+    renderHeaderGroup(groupId);
+    if (groupId) setActiveGroup(groupId);
   };
   const scheduleHeaderSync = () => {
     if (headerFrame) return;
     headerFrame = requestAnimationFrame(syncHeaderState);
+  };
+  const cancelScrollAnimation = () => {
+    if (!scrollAnimationFrame) return;
+    cancelAnimationFrame(scrollAnimationFrame);
+    scrollAnimationFrame = 0;
+  };
+  const scrollToPosition = (top) => {
+    cancelScrollAnimation();
+    const target = Math.max(0, Math.min(top, scrollArea.scrollHeight - scrollArea.clientHeight));
+    const start = scrollArea.scrollTop;
+    const distance = target - start;
+    if (galleryReducedMotion?.matches || Math.abs(distance) < 2) {
+      scrollArea.scrollTop = target;
+      syncHeaderState();
+      return;
+    }
+    const duration = Math.min(260, Math.max(150, Math.abs(distance) * .035));
+    const startedAt = performance.now();
+    const step = (now) => {
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      scrollArea.scrollTop = start + (distance * eased);
+      if (progress < 1) scrollAnimationFrame = requestAnimationFrame(step);
+      else {
+        scrollAnimationFrame = 0;
+        scrollArea.scrollTop = target;
+        syncHeaderState();
+      }
+    };
+    scrollAnimationFrame = requestAnimationFrame(step);
   };
 
   const setActiveGroup = (groupId) => {
@@ -580,7 +646,7 @@ function initializeGallery() {
     if (!section) return;
     setActiveGroup(groupId);
     const top = scrollArea.scrollTop + section.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top;
-    scrollArea.scrollTo({ top, behavior: galleryReducedMotion?.matches ? "auto" : "smooth" });
+    scrollToPosition(top);
     if (announce) live.textContent = `${section.querySelector("h3")?.textContent || ""}. ${section.querySelector("p")?.textContent || ""}`;
   };
   const scrollToPhoto = (index) => {
@@ -590,18 +656,20 @@ function initializeGallery() {
     if (card) {
       const top = scrollArea.scrollTop + card.getBoundingClientRect().top - scrollArea.getBoundingClientRect().top - Math.max(0, (scrollArea.clientHeight - card.clientHeight) / 2);
       scrollArea.scrollTo({ top, behavior: "auto" });
+      syncHeaderState();
     }
   };
   const render = () => {
-    counter.textContent = String(GALLERY_PHOTOS.length);
-    counter.setAttribute("aria-label", t("gallery.open", { count: GALLERY_PHOTOS.length }));
+    renderHeaderGroup(null, true);
     renderNavigation();
     renderTour();
   };
   const close = () => {
     imageObserver?.disconnect();
+    cancelScrollAnimation();
     header.classList.remove("is-compact");
     header.dataset.state = "expanded";
+    renderHeaderGroup(null, true);
     document.body.classList.remove("gallery-open");
     if (dialog.open) dialog.close();
     else dialog.removeAttribute("open");
@@ -637,6 +705,8 @@ function initializeGallery() {
     if (button) scrollToGroup(button.dataset.galleryGroup);
   });
   scrollArea.addEventListener("scroll", scheduleHeaderSync, { passive: true });
+  scrollArea.addEventListener("pointerdown", cancelScrollAnimation, { passive: true });
+  scrollArea.addEventListener("wheel", cancelScrollAnimation, { passive: true });
   dialog.addEventListener("keydown", (event) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
     if (event.key === "Home") { event.preventDefault(); scrollArea.scrollTo({ top: 0, behavior: "auto" }); }
@@ -647,6 +717,7 @@ function initializeGallery() {
     const scrollTop = scrollArea.scrollTop;
     render();
     scrollArea.scrollTop = scrollTop;
+    requestAnimationFrame(syncHeaderState);
   });
 }
 

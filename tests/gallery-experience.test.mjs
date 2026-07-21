@@ -7,6 +7,7 @@ const propertySource = fs.readFileSync(new URL("../property-data.js", import.met
 const appSource = fs.readFileSync(new URL("../app.js", import.meta.url), "utf8");
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const styles = fs.readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+const glassStyles = fs.readFileSync(new URL("../glass.css", import.meta.url), "utf8");
 
 function loadProperties() {
   const window = {};
@@ -22,18 +23,33 @@ test("registers Arrau as a complete, future-ready property", () => {
   assert.equal(arrau.name, "Arrau");
   assert.equal(arrau.brand, "Cordal Sur");
   assert.equal(arrau.groups.length, 11);
-  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 38);
-  assert.equal(arrau.photos.length, 38);
-  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 38);
-  assert.equal(arrau.previewOrder.length, 38);
-  assert.equal(new Set(arrau.previewOrder).size, 38);
-  assert.ok(!arrau.photos.some(({ id }) => id === "06-habitacion-3-03"));
+  assert.equal(arrau.groups.reduce((total, group) => total + group.count, 0), 35);
+  assert.equal(arrau.photos.length, 35);
+  assert.equal(new Set(arrau.photos.map(({ id }) => id)).size, 35);
+  assert.equal(arrau.previewOrder.length, 35);
+  assert.equal(new Set(arrau.previewOrder).size, 35);
+  const groupIds = arrau.groups.map(({ id }) => id);
+  assert.ok(groupIds.indexOf("entrada") < groupIds.indexOf("balcon"));
+  assert.deepEqual(Array.from(arrau.photos.filter(({ groupId }) => groupId === "habitacion1").map(({ id }) => id)), [
+    "04-habitacion-1-01", "04-habitacion-1-03", "04-habitacion-1-02",
+    "04-habitacion-1-05", "04-habitacion-1-06", "04-habitacion-1-07",
+  ]);
+  assert.deepEqual(Array.from(arrau.photos.filter(({ groupId }) => groupId === "habitacion2").map(({ id }) => id)), [
+    "05-habitacion-2-05", "05-habitacion-2-01", "05-habitacion-2-02", "05-habitacion-2-03",
+    "05-habitacion-2-04", "05-habitacion-2-06", "05-habitacion-2-07",
+  ]);
+  assert.deepEqual(Array.from(arrau.photos.filter(({ groupId }) => groupId === "habitacion3").map(({ id }) => id)), [
+    "06-habitacion-3-01", "06-habitacion-3-02",
+  ]);
+  for (const removedId of ["04-habitacion-1-04", "06-habitacion-3-03", "06-habitacion-3-04", "06-habitacion-3-05"]) {
+    assert.ok(!arrau.photos.some(({ id }) => id === removedId));
+  }
   assert.deepEqual(Array.from(arrau.previewOrder.slice(0, 5)), [
     "01-sala-01",
     "02-cocina-completa-01",
     "03-comedor-01",
     "04-habitacion-1-01",
-    "05-habitacion-2-01",
+    "05-habitacion-2-05",
   ]);
   assert.deepEqual(new Set(arrau.previewOrder), new Set(arrau.photos.map(({ id }) => id)));
 
@@ -93,9 +109,27 @@ test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tou
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-scroll[^}]+padding-top:/s);
   assert.match(styles, /prefers-reduced-transparency: reduce/);
   assert.match(styles, /@keyframes gallery-island-enter/);
-  assert.match(appSource, /scrollArea\.scrollTop > 48 \? "compact" : "expanded"/);
+  assert.match(appSource, /scrollArea\.scrollTop > 24 \? "compact" : "expanded"/);
   assert.match(appSource, /header\.classList\.toggle\("is-compact"/);
   assert.match(appSource, /scrollArea\.addEventListener\("scroll", scheduleHeaderSync, \{ passive: true \}\)/);
+  assert.match(appSource, /visibleGroupId/);
+  assert.match(appSource, /renderHeaderGroup\(groupId\)/);
+  assert.match(appSource, /counter\.textContent = String\(count\)/);
+  assert.match(appSource, /header\.dataset\.group = group\?\.id \|\| "property"/);
+  assert.match(appSource, /const scrollToPosition = \(top\) =>/);
+  assert.match(appSource, /Math\.min\(260, Math\.max\(150, Math\.abs\(distance\) \* \.035\)\)/);
+  assert.match(appSource, /scrollArea\.addEventListener\("pointerdown", cancelScrollAnimation/);
+  assert.doesNotMatch(appSource, /behavior: galleryReducedMotion\?\.matches \? "auto" : "smooth"/);
+  assert.match(styles, /width 160ms cubic-bezier/);
+  assert.match(styles, /\.gallery-header\.is-compact\[data-group="entrada"\][^}]+330px/);
+  assert.match(styles, /\.gallery-header h2[^}]+text-overflow: ellipsis[^}]+white-space: nowrap/s);
+  assert.match(styles, /\.gallery-header \.gallery-close[^}]+background: transparent[^}]+border-color: transparent[^}]+box-shadow: none/s);
+  assert.match(glassStyles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header \.gallery-close[\s\S]+background: transparent[^}]+border-color: transparent[^}]+box-shadow: none/s);
+});
+
+test("keeps room photos unnumbered in the visible tour", () => {
+  assert.doesNotMatch(html, /<figcaption/);
+  assert.doesNotMatch(appSource, /createElement\("figcaption"\)/);
 });
 
 test("matches the Cordal Sur App title gradient in both themes", () => {

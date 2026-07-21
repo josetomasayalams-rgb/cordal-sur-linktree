@@ -218,6 +218,15 @@ html[data-theme="dark"] .payment-dialog-close {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 22px rgba(0,0,0,.30);
 }
 
+@media (max-width: 479px) {
+  .gallery-header .gallery-close,
+  html[data-theme="dark"] .gallery-header .gallery-close {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
 .glass-interactive,
 .platform-card,
 .travel-card,

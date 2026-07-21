@@ -13,7 +13,7 @@
   const TRANSLATIONS = Object.freeze({
     es: Object.freeze({
       "page.title": "Arrau · Cordal Sur | Andes Chillán",
-      "page.description": "Arrau · Cordal Sur: alojamiento para hasta 7 huéspedes en Condominio Andes Chillán, Las Trancas. Explora sus 38 fotografías y consulta disponibilidad.",
+      "page.description": "Arrau · Cordal Sur: alojamiento para hasta 7 huéspedes en Condominio Andes Chillán, Las Trancas. Explora sus 35 fotografías y consulta disponibilidad.",
       "preferences.aria": "Preferencias de visualización",
       "language.aria": "Selector de idioma",
       "theme.aria": "Selector de tema",
@@ -144,6 +144,7 @@
       "gallery.counter": "{current} / {total}",
       "gallery.thumbnail.aria": "Foto {current} de {total}: {description}",
       "gallery.photo.unavailable": "Esta fotografía no está disponible. Mostramos la siguiente.",
+      "gallery.group.count": "Fotos en {name}: {count}",
       "gallery.sala": "Sala", "gallery.sala.caption": "Vista de la sala",
       "gallery.cocina": "Cocina completa", "gallery.cocina.caption": "Cocina equipada",
       "gallery.comedor": "Comedor", "gallery.comedor.caption": "Vista del comedor",
@@ -178,7 +179,7 @@
     }),
     pt: Object.freeze({
       "page.title": "Arrau · Cordal Sur | Andes Chillán",
-      "page.description": "Arrau · Cordal Sur: hospedagem para até 7 hóspedes no Condomínio Andes Chillán, em Las Trancas. Explore suas 38 fotografias e consulte a disponibilidade.",
+      "page.description": "Arrau · Cordal Sur: hospedagem para até 7 hóspedes no Condomínio Andes Chillán, em Las Trancas. Explore suas 35 fotografias e consulte a disponibilidade.",
       "preferences.aria": "Preferências de visualização",
       "language.aria": "Seletor de idioma",
       "theme.aria": "Seletor de tema",
@@ -298,6 +299,7 @@
       "gallery.counter": "{current} / {total}",
       "gallery.thumbnail.aria": "Foto {current} de {total}: {description}",
       "gallery.photo.unavailable": "Esta fotografia não está disponível. Mostramos a próxima.",
+      "gallery.group.count": "Fotos em {name}: {count}",
       "gallery.sala": "Sala", "gallery.sala.caption": "Vista da sala",
       "gallery.cocina": "Cozinha completa", "gallery.cocina.caption": "Cozinha equipada",
       "gallery.comedor": "Sala de jantar", "gallery.comedor.caption": "Vista da sala de jantar",
@@ -326,7 +328,7 @@
     }),
     en: Object.freeze({
       "page.title": "Arrau · Cordal Sur | Andes Chillán",
-      "page.description": "Arrau · Cordal Sur: accommodation for up to 7 guests at Andes Chillán Condominium in Las Trancas. Explore its 38 photographs and check availability.",
+      "page.description": "Arrau · Cordal Sur: accommodation for up to 7 guests at Andes Chillán Condominium in Las Trancas. Explore its 35 photographs and check availability.",
       "preferences.aria": "Display preferences",
       "language.aria": "Language selector",
       "theme.aria": "Theme selector",
@@ -444,6 +446,7 @@
       "gallery.counter": "{current} / {total}",
       "gallery.thumbnail.aria": "Photo {current} of {total}: {description}",
       "gallery.photo.unavailable": "This photograph is unavailable. Showing the next one.",
+      "gallery.group.count": "Photos in {name}: {count}",
       "gallery.sala": "Living room", "gallery.sala.caption": "Living room view",
       "gallery.cocina": "Full kitchen", "gallery.cocina.caption": "Equipped kitchen",
       "gallery.comedor": "Dining room", "gallery.comedor.caption": "Dining room view",
