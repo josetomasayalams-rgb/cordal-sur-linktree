@@ -216,8 +216,15 @@
       <div class="gallery-stage" id="gallery-stage" data-i18n-aria="gallery.stage.aria" aria-label="Visor de fotografías">
         <div class="gallery-ambient" id="gallery-ambient" aria-hidden="true"></div>
         <button class="gallery-nav gallery-nav-prev glass-interactive" id="gallery-previous" type="button" data-i18n-aria="gallery.previous" aria-label="Fotografía anterior">←</button>
-        <img class="gallery-main-image" id="gallery-main-image" alt="" decoding="async">
+        <div class="gallery-image-viewport" id="gallery-image-viewport">
+          <img class="gallery-main-image" id="gallery-main-image" alt="" decoding="async">
+        </div>
         <button class="gallery-nav gallery-nav-next glass-interactive" id="gallery-next" type="button" data-i18n-aria="gallery.next" aria-label="Fotografía siguiente">→</button>
+        <div class="gallery-zoom-controls" role="group" data-i18n-aria="gallery.zoom.controls" aria-label="Controles de ampliación">
+          <button class="gallery-zoom-button glass-interactive" id="gallery-zoom-out" type="button" data-i18n-aria="gallery.zoom.out" aria-label="Alejar fotografía">−</button>
+          <button class="gallery-zoom-reset glass-interactive" id="gallery-zoom-reset" type="button" data-i18n-aria="gallery.zoom.reset" aria-label="Restablecer ampliación">100%</button>
+          <button class="gallery-zoom-button glass-interactive" id="gallery-zoom-in" type="button" data-i18n-aria="gallery.zoom.in" aria-label="Ampliar fotografía">+</button>
+        </div>
       </div>
       <div class="gallery-photo-meta">
         <p class="gallery-photo-category" id="gallery-photo-category"></p>

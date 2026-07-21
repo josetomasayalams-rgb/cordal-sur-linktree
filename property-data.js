@@ -29,6 +29,15 @@
     })
   ));
 
+  // Interleave categories so the cover can travel through the complete
+  // collection without showing a long block from the same room.
+  const previewOrder = Object.freeze(Array.from(
+    { length: Math.max(...groups.map(({ count }) => count)) },
+    (_, round) => groups
+      .filter(({ count }) => round < count)
+      .map(({ slug }) => `${slug}-${String(round + 1).padStart(2, "0")}`)
+  ).flat());
+
   const arrau = Object.freeze({
     id: "arrau",
     name: "Arrau",
@@ -39,13 +48,7 @@
     accommodationKey: "stay.location",
     groups,
     photos,
-    featured: Object.freeze([
-      Object.freeze({ id: "01-sala-02", position: "center 54%" }),
-      Object.freeze({ id: "02-cocina-completa-04", position: "center 52%" }),
-      Object.freeze({ id: "04-habitacion-1-01", position: "center 46%" }),
-      Object.freeze({ id: "05-habitacion-2-01", position: "center 42%" }),
-      Object.freeze({ id: "10-exterior-03", position: "center 55%" })
-    ])
+    previewOrder
   });
 
   window.CS_LINKTREE_PROPERTIES = Object.freeze([arrau]);
