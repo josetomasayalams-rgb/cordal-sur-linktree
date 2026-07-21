@@ -468,14 +468,27 @@ function initializeGallery() {
   const closeButton = document.querySelector("#gallery-close");
   const filters = document.querySelector("#gallery-filters");
   const scrollArea = document.querySelector("#gallery-scroll");
+  const header = dialog?.querySelector(".gallery-header");
   const tour = document.querySelector("#gallery-tour");
   const counter = document.querySelector("#gallery-counter");
   const live = document.querySelector("#gallery-live");
-  if (!dialog || !openButton || !closeButton || !filters || !scrollArea || !tour || !counter || !live) return;
+  if (!dialog || !openButton || !closeButton || !filters || !scrollArea || !header || !tour || !counter || !live) return;
 
   let returnFocus = openButton;
   let imageObserver;
+  let headerFrame = 0;
   const galleryReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+
+  const syncHeaderState = () => {
+    headerFrame = 0;
+    const state = scrollArea.scrollTop > 48 ? "compact" : "expanded";
+    header.classList.toggle("is-compact", state === "compact");
+    header.dataset.state = state;
+  };
+  const scheduleHeaderSync = () => {
+    if (headerFrame) return;
+    headerFrame = requestAnimationFrame(syncHeaderState);
+  };
 
   const setActiveGroup = (groupId) => {
     filters.querySelectorAll("[data-gallery-group]").forEach((button) => {
@@ -587,6 +600,8 @@ function initializeGallery() {
   };
   const close = () => {
     imageObserver?.disconnect();
+    header.classList.remove("is-compact");
+    header.dataset.state = "expanded";
     document.body.classList.remove("gallery-open");
     if (dialog.open) dialog.close();
     else dialog.removeAttribute("open");
@@ -602,6 +617,7 @@ function initializeGallery() {
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
     scrollArea.scrollTop = 0;
+    syncHeaderState();
     requestAnimationFrame(() => {
       if (hasStartPhoto) scrollToPhoto(startIndex);
       else setActiveGroup(PHOTO_GROUPS[0]?.id);
@@ -620,6 +636,7 @@ function initializeGallery() {
     const button = event.target.closest("[data-gallery-group]");
     if (button) scrollToGroup(button.dataset.galleryGroup);
   });
+  scrollArea.addEventListener("scroll", scheduleHeaderSync, { passive: true });
   dialog.addEventListener("keydown", (event) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
     if (event.key === "Home") { event.preventDefault(); scrollArea.scrollTo({ top: 0, behavior: "auto" }); }

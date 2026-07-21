@@ -81,14 +81,29 @@ test("keeps navigation and zoom chrome away from the photographs", () => {
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-photo-grid[^}]+columns: 1/s);
 });
 
-test("uses a compact clipped Cordal Sur header over the mobile photo tour", () => {
+test("uses a responsive Cordal Sur Liquid Glass island over the mobile photo tour", () => {
   assert.match(html, /class="gallery-close-lockup"/);
   assert.match(html, /class="gallery-close-symbol"/);
   assert.match(html, /class="gallery-close-arrow">←<\/span>/);
   assert.match(styles, /\.gallery-close-symbol[^}]+cordal-sur-symbol-reverse\.svg/s);
-  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header::before[^}]+clip-path:/s);
+  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-header[^}]+width: min\(calc\(100% - 24px\), 366px\)/s);
+  assert.match(styles, /\.gallery-header\.is-compact[^}]+width: min\(calc\(100% - 24px\), 252px\)/s);
+  assert.match(styles, /\.gallery-header[^}]+border-radius: 999px/s);
+  assert.match(styles, /\.gallery-header[^}]+backdrop-filter: blur\(22px\) saturate\(145%\)/s);
   assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-scroll[^}]+padding-top:/s);
   assert.match(styles, /prefers-reduced-transparency: reduce/);
+  assert.match(styles, /@keyframes gallery-island-enter/);
+  assert.match(appSource, /scrollArea\.scrollTop > 48 \? "compact" : "expanded"/);
+  assert.match(appSource, /header\.classList\.toggle\("is-compact"/);
+  assert.match(appSource, /scrollArea\.addEventListener\("scroll", scheduleHeaderSync, \{ passive: true \}\)/);
+});
+
+test("matches the Cordal Sur App title gradient in both themes", () => {
+  assert.match(styles, /--brand-title-gradient: linear-gradient\(110deg, #102c26, #153b33 52%, #785018\)/);
+  assert.match(styles, /--brand-title-gradient: linear-gradient\(110deg, #fffaf0, #eef3ed 52%, #f0cc91\)/);
+  assert.match(styles, /\.brand-name[^}]+background: var\(--brand-title-gradient\)[^}]+background-clip: text/s);
+  assert.match(styles, /\.hero-title[^}]+background: var\(--brand-title-gradient\)[^}]+background-clip: text/s);
+  assert.match(styles, /@media \(forced-colors: active\)[\s\S]+-webkit-text-fill-color: CanvasText/s);
 });
 
 test("keeps the mobile refresh control aligned and removes the pull-down skip label", () => {
