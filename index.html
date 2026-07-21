@@ -200,35 +200,18 @@
   <dialog class="gallery-dialog" id="gallery-dialog" aria-labelledby="gallery-title" aria-describedby="gallery-description">
     <div class="gallery-dialog-inner">
       <header class="gallery-header">
+        <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">←</button>
         <div>
           <p class="eyebrow" data-i18n="gallery.kicker">Colección fotográfica</p>
           <h2 id="gallery-title" data-i18n="gallery.title">Arrau</h2>
           <p id="gallery-description" data-i18n="gallery.description">Recorre cada ambiente de la propiedad.</p>
         </div>
-        <div class="gallery-header-actions">
-          <output class="gallery-counter" id="gallery-counter" aria-live="polite">1 / 46</output>
-          <button class="gallery-close glass-interactive" id="gallery-close" type="button" data-i18n-aria="gallery.close" aria-label="Cerrar galería">×</button>
-        </div>
+        <output class="gallery-counter" id="gallery-counter" aria-live="polite">46</output>
       </header>
-      <div class="gallery-filters" id="gallery-filters" role="group" data-i18n-aria="gallery.filters.aria" aria-label="Filtrar fotografías por ambiente"></div>
-      <div class="gallery-stage" id="gallery-stage" data-i18n-aria="gallery.stage.aria" aria-label="Visor de fotografías">
-        <div class="gallery-ambient" id="gallery-ambient" aria-hidden="true"></div>
-        <button class="gallery-nav gallery-nav-prev glass-interactive" id="gallery-previous" type="button" data-i18n-aria="gallery.previous" aria-label="Fotografía anterior">←</button>
-        <div class="gallery-image-viewport" id="gallery-image-viewport">
-          <img class="gallery-main-image" id="gallery-main-image" alt="" decoding="async">
-        </div>
-        <button class="gallery-nav gallery-nav-next glass-interactive" id="gallery-next" type="button" data-i18n-aria="gallery.next" aria-label="Fotografía siguiente">→</button>
-        <div class="gallery-zoom-controls" role="group" data-i18n-aria="gallery.zoom.controls" aria-label="Controles de ampliación">
-          <button class="gallery-zoom-button glass-interactive" id="gallery-zoom-out" type="button" data-i18n-aria="gallery.zoom.out" aria-label="Alejar fotografía">−</button>
-          <button class="gallery-zoom-reset glass-interactive" id="gallery-zoom-reset" type="button" data-i18n-aria="gallery.zoom.reset" aria-label="Restablecer ampliación">100%</button>
-          <button class="gallery-zoom-button glass-interactive" id="gallery-zoom-in" type="button" data-i18n-aria="gallery.zoom.in" aria-label="Ampliar fotografía">+</button>
-        </div>
+      <div class="gallery-scroll" id="gallery-scroll" tabindex="0">
+        <nav class="gallery-filters" id="gallery-filters" data-i18n-aria="gallery.filters.aria" aria-label="Filtrar fotografías por ambiente"></nav>
+        <main class="gallery-tour" id="gallery-tour" data-i18n-aria="gallery.stage.aria" aria-label="Visor de fotografías"></main>
       </div>
-      <div class="gallery-photo-meta">
-        <p class="gallery-photo-category" id="gallery-photo-category"></p>
-        <p class="gallery-photo-caption" id="gallery-photo-caption"></p>
-      </div>
-      <div class="gallery-thumbnails" id="gallery-thumbnails" role="list" data-i18n-aria="gallery.thumbnails.aria" aria-label="Miniaturas de la galería"></div>
       <p class="visually-hidden" id="gallery-live" aria-live="polite"></p>
     </div>
   </dialog>

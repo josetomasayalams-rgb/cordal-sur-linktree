@@ -45,48 +45,40 @@ test("registers Arrau as a complete, future-ready property", () => {
   }
 });
 
-test("uses a single immersive gallery with a rotating cover and no nested viewer", () => {
+test("uses a single Airbnb-inspired photo tour with a rotating cover", () => {
   assert.equal((html.match(/<dialog\b/g) || []).length, 2, "Only gallery and payment dialogs should remain");
   assert.match(html, /id="gallery-filters"/);
-  assert.match(html, /id="gallery-main-image"/);
-  assert.match(html, /id="gallery-thumbnails"/);
+  assert.match(html, /id="gallery-scroll"/);
+  assert.match(html, /id="gallery-tour"/);
   assert.match(html, /aria-controls="gallery-dialog"/);
-  assert.doesNotMatch(html, /photo-viewer|carousel-toggle|carousel-controls|hero-layer/);
+  assert.doesNotMatch(html, /photo-viewer|carousel-toggle|carousel-controls|hero-layer|gallery-previous|gallery-next|gallery-zoom/);
   assert.doesNotMatch(appSource, /initializeCarousel|scheduleAutoplay|autoplayTimer/);
   assert.match(appSource, /PREVIEW_ROTATION_MS = 6500/);
   assert.match(appSource, /visiblePhotos/);
   assert.match(appSource, /data-preview-refresh/);
   assert.match(appSource, /index === 0 \? photo\.src : photo\.thumbnail/);
-  assert.match(appSource, /event\.key === "ArrowLeft"/);
-  assert.match(appSource, /event\.key === "ArrowRight"/);
   assert.match(appSource, /event\.key === "Home"/);
   assert.match(appSource, /event\.key === "End"/);
-  assert.match(appSource, /pointerdown/);
-  assert.match(appSource, /pointerup/);
-  assert.match(appSource, /loader\.addEventListener\("error"/);
-  assert.match(appSource, /request !== imageRequest/);
-  assert.match(appSource, /preloadAdjacent/);
+  assert.match(appSource, /IntersectionObserver/);
+  assert.match(appSource, /scrollArea\.scrollTo/);
+  assert.match(appSource, /image\.addEventListener\("error"/);
 });
 
-test("keeps portrait photos complete and the preview responsive", () => {
-  assert.match(styles, /\.gallery-main-image[^}]+object-fit: contain/s);
-  assert.match(styles, /\.gallery-main-image[^}]+min-height: 0/s);
-  assert.match(styles, /\.gallery-image-viewport[^}]+touch-action: none/s);
-  assert.match(styles, /\.gallery-ambient[^}]+filter: blur/s);
+test("keeps every tour photo complete and the preview responsive", () => {
+  assert.match(styles, /\.gallery-photo-card img[^}]+height: auto/s);
+  assert.match(styles, /\.gallery-photo-card img[^}]+object-fit: contain/s);
+  assert.match(styles, /\.gallery-photo-grid[^}]+columns: 2/s);
   assert.match(styles, /\.preview-filmstrip[^}]+overflow-x: auto/s);
   assert.match(styles, /@media \(min-width: 640px\)[\s\S]+\.editorial-preview[^}]+grid-template-columns/s);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
-test("supports mobile zoom, pan and filtered counters", () => {
-  for (const id of ["gallery-image-viewport", "gallery-zoom-out", "gallery-zoom-reset", "gallery-zoom-in"]) {
-    assert.match(html, new RegExp(`id="${id}"`));
-  }
-  assert.match(appSource, /applyZoom/);
-  assert.match(appSource, /pointerDistance/);
-  assert.match(appSource, /pointerGesture\?\.type === "pinch"/);
-  assert.match(appSource, /indexes\.indexOf\(currentIndex\) \+ 1/);
-  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+grid-template-rows: auto auto minmax\(240px, 1fr\) auto auto/s);
+test("keeps navigation and zoom chrome away from the photographs", () => {
+  assert.doesNotMatch(html, /gallery-nav|gallery-zoom-controls|gallery-image-viewport/);
+  assert.doesNotMatch(appSource, /applyZoom|pointerDistance|zoomScale|pointerGesture/);
+  assert.match(styles, /\.gallery-dialog[^}]+width: 100%/s);
+  assert.match(styles, /\.gallery-scroll[^}]+overflow-y: auto/s);
+  assert.match(styles, /@media \(max-width: 479px\)[\s\S]+\.gallery-photo-grid[^}]+columns: 1/s);
 });
 
 test("keeps the mobile refresh control aligned and removes the pull-down skip label", () => {
